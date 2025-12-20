@@ -1,0 +1,41 @@
+# === PYTHON ===
+__pycache__/
+*.py[cod]
+*.so
+
+# === DJANGO ===
+*.sqlite3
+*.log
+media/
+
+# === VENV ===
+venv/
+.venv/
+
+# === ENV FILES ===
+.env
+.env.*
+
+# === COMPILATION ===
+*.pot
+*.pyc
+
+# === IDE ===
+.vscode/
+.idea/
+
+# === NODE ===
+node_modules/
+
+# === PROJECT SPECIFIC ===
+athlete_videos/
+videos/
+uploads/
+processed/
+*.mp4
+*.avi
+*.png
+*.jpg
+
+# === OTHER ===
+.DS_Store

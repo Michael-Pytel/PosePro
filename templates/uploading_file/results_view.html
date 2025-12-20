@@ -1,0 +1,36 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analysis Results</title>
+    <link rel="stylesheet" href="{% static 'css/upload_video/common.css' %}">
+    <link rel="stylesheet" href="{% static 'css/upload_video/results.css' %}">
+</head>
+<body>
+
+<div class="container wide">
+    <a href="/" class="back-button">← Upload New Video</a>
+
+    <div class="results-header">
+        <h2>Analysis Results</h2>
+        <p class="subtitle">Your exercise has been analyzed</p>
+    </div>
+
+    <div class="results-stats" id="resultsStats"></div>
+
+    <div class="results-video" id="resultsVideoContainer"></div>
+
+    <h3 style="margin-bottom: 20px;">Individual Repetitions</h3>
+    <div class="clips-grid" id="clipsGrid"></div>
+</div>
+
+<!-- ⭐ EMBED DATA -->
+<script>
+    window.RESULTS_DATA = {{ results_data|safe }};
+</script>
+<script src="{% static 'js/upload_video/results-display.js' %}"></script>
+
+</body>
+</html>

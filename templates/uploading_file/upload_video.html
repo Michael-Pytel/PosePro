@@ -1,0 +1,96 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Video</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.9.3/min/dropzone.min.css" />
+    <link rel="stylesheet" href="{% static 'css/upload_video/common.css' %}">
+    <link rel="stylesheet" href="{% static 'css/upload_video/upload.css' %}">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.9.3/min/dropzone.min.js"></script>
+</head>
+<body>
+
+<div class="container" id="uploadView">
+    <h2>Upload Video</h2>
+    <p class="subtitle">Drag and drop your video file or click to browse</p>
+
+    <!-- Warning Box -->
+    <div class="warning-box">
+        <div class="warning-icon">⚠️</div>
+        <div class="warning-content">
+            <strong>Important:</strong> For accurate analysis, please record your video from the side view (profile angle).
+            Front or angled recordings may result in less accurate form assessment.
+        </div>
+    </div>
+
+    <div class="upload-area">
+        <form class="dropzone" id="dropzoneArea">
+            {% csrf_token %}
+        </form>
+    </div>
+
+    <div class="controls-area">
+        <button id="start" disabled>Send and Process Video</button>
+
+        <div class="progress-wrapper" id="progressWrapper">
+            <div class="progress-bar" id="dropzoneProgress"></div>
+        </div>
+
+        <div class="status-message" id="statusMessage"></div>
+    </div>
+</div>
+
+<!-- Loading Modal -->
+<div class="modal" id="loadingModal">
+    <div class="modal-content">
+        <div class="spinner"></div>
+        <h3>Processing Video</h3>
+        <p>Analyzing your exercise... This may take a minute.</p>
+        
+        <!-- Pipeline Progress Bar -->
+        <div class="pipeline-progress-modal" id="pipelineProgressModal">
+            <div class="pipeline-stages-modal">
+                <div class="pipeline-stage-modal" data-stage="segmentation">
+                    <div class="stage-dot-modal"></div>
+                    <div class="stage-label-modal">Segmentation</div>
+                </div>
+                <div class="pipeline-stage-modal" data-stage="landmarks">
+                    <div class="stage-dot-modal"></div>
+                    <div class="stage-label-modal">Landmarks</div>
+                </div>
+                <div class="pipeline-stage-modal" data-stage="angles">
+                    <div class="stage-dot-modal"></div>
+                    <div class="stage-label-modal">Angles</div>
+                </div>
+                <div class="pipeline-stage-modal" data-stage="aggregation">
+                    <div class="stage-dot-modal"></div>
+                    <div class="stage-label-modal">Aggregation</div>
+                </div>
+                <div class="pipeline-stage-modal" data-stage="prediction">
+                    <div class="stage-dot-modal"></div>
+                    <div class="stage-label-modal">Prediction</div>
+                </div>
+            </div>
+            <div class="pipeline-status-text-modal" id="pipelineStatusTextModal">
+                <span id="currentStageTextModal">Preparing...</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Error Modal -->
+<div class="modal" id="errorModal">
+    <div class="modal-content error">
+        <div class="error-icon">❌</div>
+        <h3>Upload Error</h3>
+        <p id="errorMessage"></p>
+        <button onclick="closeErrorModal()">OK</button>
+    </div>
+</div>
+
+<script src="{% static 'js/upload_video/dropzone-handler.js' %}"></script>
+
+</body>
+</html>

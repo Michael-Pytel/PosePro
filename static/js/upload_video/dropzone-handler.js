@@ -99,7 +99,7 @@ function checkPipelineProgress() {
 }
 
 let videoDropzone = new Dropzone("#dropzoneArea", {
-    url: '/',
+    url: '/upload/',
     maxFiles: 1,
     paramName: "video",
     acceptedFiles: "video/*",

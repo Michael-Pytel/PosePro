@@ -200,7 +200,7 @@ def upload_video(request):
                 "redirect_url": "/results/"
             })
 
-        return redirect("upload_video")
+        return redirect("/upload/")
     return render(request, "uploading_file/upload_video.html")
 
 
@@ -208,7 +208,7 @@ def results_view(request):
     results_data = request.session.get('analysis_results')
 
     if not results_data:
-        return redirect('/')
+        return redirect('/upload/')
 
     results_json = mark_safe(json.dumps(results_data))
 

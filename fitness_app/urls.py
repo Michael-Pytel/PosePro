@@ -22,11 +22,10 @@ from django.urls import path
 from fitness_app.views import upload_video, results_view, get_pipeline_progress
 
 urlpatterns = [
-    path('', upload_video, name='upload_video'),
+    path('upload/', upload_video, name='upload_video'),
     path('results/', results_view, name='results'),
     path('api/progress/', get_pipeline_progress, name='get_progress'),
     path('admin/', admin.site.urls),
 ]
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-

@@ -1,103 +1,71 @@
 Dropzone.autoDiscover = false;
 
+// DOM Elements
 const startButton = document.getElementById("start");
 const progressWrapper = document.getElementById("progressWrapper");
 const progressBar = document.getElementById("dropzoneProgress");
 const statusMessage = document.getElementById("statusMessage");
 const dropzoneArea = document.getElementById("dropzoneArea");
-const loadingModal = document.getElementById("loadingModal");
-const pipelineProgressModal = document.getElementById("pipelineProgressModal");
-const currentStageTextModal = document.getElementById("currentStageTextModal");
+const processingModal = document.getElementById("processingModal");
+const stageText = document.getElementById("stageText");
+const timeElapsed = document.getElementById("timeElapsed");
+const currentStep = document.getElementById("currentStep");
+const processingTip = document.getElementById("processingTip");
 
+// State
 let activeTimeouts = [];
 let activeVideoElement = null;
 let progressCheckInterval = null;
-let currentProgressPercentage = 0;
+let startTime = null;
+let timerInterval = null;
+let currentTipIndex = 0;
 
-// Stage display names
-const stageDisplayNames = {
-    'segmentation': 'Segmenting Repetitions',
-    'landmarks': 'Extracting Pose Landmarks',
-    'angles': 'Calculating Joint Angles',
-    'aggregation': 'Aggregating Features',
-    'prediction': 'Making Predictions'
+// Stage configuration
+const stageConfig = {
+    'segmentation': {
+        name: 'Segmenting repetitions...',
+        icon: '✂️',
+        step: 1,
+        description: 'Identifying individual exercise repetitions in your video'
+    },
+    'landmarks': {
+        name: 'Extracting pose landmarks...',
+        icon: '🎯',
+        step: 2,
+        description: 'Detecting 33 body landmarks for biomechanical analysis'
+    },
+    'angles': {
+        name: 'Calculating joint angles...',
+        icon: '📐',
+        step: 3,
+        description: 'Computing angles at key joints to assess form'
+    },
+    'aggregation': {
+        name: 'Aggregating features...',
+        icon: '📊',
+        step: 4,
+        description: 'Combining movement data for comprehensive analysis'
+    },
+    'prediction': {
+        name: 'Making predictions...',
+        icon: '🤖',
+        step: 5,
+        description: 'AI model evaluating your exercise technique'
+    }
 };
 
-function updateStageUI(stage) {
-    // Update the pipeline UI to show the current stage
-    const stages = document.querySelectorAll('.pipeline-stage-modal');
-    const stageOrder = ['segmentation', 'landmarks', 'angles', 'aggregation', 'prediction'];
-    
-    stages.forEach((el, index) => {
-        const stageAttr = el.getAttribute('data-stage');
-        const stageIdx = stageOrder.indexOf(stageAttr);
-        const currentIdx = stageOrder.indexOf(stage);
-        
-        el.classList.remove('active', 'completed');
-        
-        if (stageIdx < currentIdx) {
-            el.classList.add('completed');
-        } else if (stageIdx === currentIdx) {
-            el.classList.add('active');
-            updateStageText(stage);
-        }
-    });
-}
+// Tips to display during processing
+const processingTips = [
+    "Our AI analyzes 33 body landmarks in real-time to assess your exercise form.",
+    "The system evaluates head position, hip alignment, elbow placement, and range of motion.",
+    "We use Random Forest classifiers achieving over 92% accuracy in form assessment.",
+    "MediaPipe pose estimation tracks your movement with sub-millimeter precision.",
+    "Each repetition is analyzed individually for detailed performance insights.",
+    "Biomechanical analysis calculates joint angles to ensure proper form.",
+    "The model was trained on thousands of exercise videos for accurate predictions."
+];
 
-function updateStageText(stage) {
-    // Update the status text with animation
-    const displayName = stageDisplayNames[stage] || 'Processing...';
-    // remove any previous animation classes
-    currentStageTextModal.classList.remove('updating', 'zoom');
-
-    // set the text immediately
-    currentStageTextModal.textContent = displayName;
-
-    // small timeout to allow DOM to register the text change, then trigger animations
-    setTimeout(() => {
-        // slide animation
-        currentStageTextModal.classList.add('updating');
-
-        // trigger zoom animation: remove then re-add to restart
-        void currentStageTextModal.offsetWidth;
-        currentStageTextModal.classList.add('zoom');
-    }, 20);
-}
-
-function checkPipelineProgress() {
-    // Poll the server for pipeline progress
-    fetch('/api/progress/')
-        .then(response => response.json())
-        .then(data => {
-            const currentStage = data.current_stage;
-            const progress = data.progress;
-            
-            if (currentStage !== 'idle') {
-                // Update stage UI
-                if (currentStage !== 'complete' && currentStage !== 'error') {
-                    updateStageUI(currentStage);
-                }
-                
-                // Update progress percentage if we're past file upload
-                if (progress > 0) {
-                    currentProgressPercentage = progress;
-                }
-            }
-            
-            // If processing complete, stop polling
-            if (currentStage === 'complete' || currentStage === 'error') {
-                clearInterval(progressCheckInterval);
-                if (currentStage === 'complete') {
-                    updateStageUI('prediction');
-                    document.querySelectorAll('.pipeline-stage-modal').forEach(el => {
-                        el.classList.add('completed');
-                    });
-                }
-            }
-        })
-        .catch(error => console.error('Progress check error:', error));
-}
-
+// Initialize Dropzone
 let videoDropzone = new Dropzone("#dropzoneArea", {
     url: '/upload/',
     maxFiles: 1,
@@ -114,6 +82,7 @@ let videoDropzone = new Dropzone("#dropzoneArea", {
     dictCancelUpload: "Cancel upload"
 });
 
+// Utility Functions
 function formatFileSize(bytes) {
     if (bytes === 0) return '0 Bytes';
     const k = 1024;
@@ -122,12 +91,220 @@ function formatFileSize(bytes) {
     return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
 }
 
+function formatTime(seconds) {
+    if (seconds < 60) {
+        return `${seconds}s`;
+    }
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}m ${secs}s`;
+}
+
+function updateTimer() {
+    if (startTime) {
+        const elapsed = Math.floor((Date.now() - startTime) / 1000);
+        timeElapsed.textContent = formatTime(elapsed);
+    }
+}
+
+function rotateTip() {
+    currentTipIndex = (currentTipIndex + 1) % processingTips.length;
+    processingTip.style.opacity = '0';
+    setTimeout(() => {
+        processingTip.textContent = processingTips[currentTipIndex];
+        processingTip.style.opacity = '1';
+    }, 300);
+}
+
+function updateStageUI(stage) {
+    console.log('Updating to stage:', stage);
+    
+    const config = stageConfig[stage];
+    if (!config) {
+        console.warn('Unknown stage:', stage);
+        return;
+    }
+    
+    // Update stage text
+    const stageIcon = document.querySelector('.stage-icon');
+    if (stageIcon) {
+        stageIcon.textContent = config.icon;
+    }
+    
+    if (stageText) {
+        stageText.textContent = config.name;
+    }
+    
+    // Update step counter
+    if (currentStep) {
+        currentStep.textContent = `Step ${config.step}/5`;
+    }
+    
+    // Update step indicators
+    const allSteps = document.querySelectorAll('.step-item');
+    allSteps.forEach(step => {
+        const stepStage = step.getAttribute('data-step');
+        step.classList.remove('active', 'completed');
+        
+        // Mark completed steps
+        const stepConfig = stageConfig[stepStage];
+        if (stepConfig && stepConfig.step < config.step) {
+            step.classList.add('completed');
+        }
+        // Mark current step
+        else if (stepStage === stage) {
+            step.classList.add('active');
+        }
+    });
+}
+
+function checkPipelineProgress() {
+    fetch('/api/progress/')
+        .then(response => response.json())
+        .then(data => {
+            console.log('Progress data:', data);
+            
+            const currentStage = data.current_stage;
+            const progress = data.progress;
+            
+            if (currentStage && currentStage !== 'idle') {
+                if (currentStage !== 'complete' && currentStage !== 'error') {
+                    updateStageUI(currentStage);
+                }
+                
+                // If processing complete, stop polling
+                if (currentStage === 'complete') {
+                    clearInterval(progressCheckInterval);
+                    clearInterval(timerInterval);
+                    
+                    // Mark all steps as completed
+                    document.querySelectorAll('.step-item').forEach(step => {
+                        step.classList.remove('active');
+                        step.classList.add('completed');
+                    });
+                    
+                    if (stageText) {
+                        stageText.textContent = 'Analysis complete!';
+                    }
+                } else if (currentStage === 'error') {
+                    clearInterval(progressCheckInterval);
+                    clearInterval(timerInterval);
+                }
+            }
+        })
+        .catch(error => console.error('Progress check error:', error));
+}
+
+function showProcessingModal() {
+    console.log('Showing processing modal');
+    
+    // Reset state
+    startTime = Date.now();
+    currentTipIndex = 0;
+    
+    // Show modal
+    processingModal.classList.add('active');
+    
+    // Initialize display
+    if (processingTip) {
+        processingTip.textContent = processingTips[0];
+    }
+    
+    if (timeElapsed) {
+        timeElapsed.textContent = '0s';
+    }
+    
+    if (currentStep) {
+        currentStep.textContent = 'Step 1/5';
+    }
+    
+    // Start timer
+    if (timerInterval) clearInterval(timerInterval);
+    timerInterval = setInterval(updateTimer, 1000);
+    
+    // Rotate tips every 8 seconds
+    setInterval(rotateTip, 8000);
+    
+    // Start with first stage
+    setTimeout(() => {
+        updateStageUI('segmentation');
+        
+        // Start progress polling
+        if (progressCheckInterval) clearInterval(progressCheckInterval);
+        progressCheckInterval = setInterval(checkPipelineProgress, 500);
+    }, 500);
+}
+
+function hideProcessingModal() {
+    processingModal.classList.remove('active');
+    if (timerInterval) clearInterval(timerInterval);
+    if (progressCheckInterval) clearInterval(progressCheckInterval);
+}
+
+// Video Preview Functions
+function cleanupPreviousVideo() {
+    activeTimeouts.forEach(t => clearTimeout(t));
+    activeTimeouts = [];
+
+    if (activeVideoElement) {
+        activeVideoElement.pause();
+
+        if (activeVideoElement._playHandler) {
+            activeVideoElement.removeEventListener("play", activeVideoElement._playHandler);
+        }
+        if (activeVideoElement._pauseHandler) {
+            activeVideoElement.removeEventListener("pause", activeVideoElement._pauseHandler);
+        }
+
+        const src = activeVideoElement.src;
+        activeVideoElement.src = '';
+        activeVideoElement.load();
+        if (src && src.startsWith('blob:')) {
+            URL.revokeObjectURL(src);
+        }
+
+        activeVideoElement = null;
+    }
+
+    const preview = document.getElementById("videoPreviewContainer");
+    if (preview) {
+        if (preview._clickHandler) {
+            preview.removeEventListener("click", preview._clickHandler);
+        }
+        if (preview.parentNode) {
+            preview.remove();
+        }
+    }
+}
+
+function removeVideo() {
+    const preview = document.getElementById("videoPreviewContainer");
+    if (preview) {
+        preview.classList.remove("visible");
+
+        setTimeout(() => {
+            cleanupPreviousVideo();
+            videoDropzone.removeAllFiles(true);
+            dropzoneArea.classList.remove("has-file");
+        }, 300);
+    }
+
+    startButton.disabled = true;
+    startButton.textContent = "Send and Process Video";
+    progressWrapper.classList.remove("active");
+    progressBar.style.width = "0%";
+    statusMessage.style.display = "none";
+    statusMessage.className = "status-message";
+}
+
+// Dropzone Event Handlers
 videoDropzone.on("addedfile", function (file) {
+    console.log('File added:', file.name);
     cleanupPreviousVideo();
 
     dropzoneArea.classList.add("has-file");
     startButton.disabled = false;
-    startButton.textContent = "Send and Process Video";
+    startButton.querySelector('span').textContent = "Send and Process Video";
 
     const wrapper = document.createElement("div");
     wrapper.className = "video-preview-container";
@@ -177,7 +354,6 @@ videoDropzone.on("addedfile", function (file) {
 
     const wrapperClickHandler = (e) => {
         if (e.target === removeBtn || removeBtn.contains(e.target)) return;
-
         if (videoElement.paused) {
             videoElement.play();
         } else {
@@ -219,71 +395,15 @@ videoDropzone.on("addedfile", function (file) {
     statusMessage.style.display = "none";
 });
 
-function cleanupPreviousVideo() {
-    activeTimeouts.forEach(t => clearTimeout(t));
-    activeTimeouts = [];
-
-    if (activeVideoElement) {
-        activeVideoElement.pause();
-
-        if (activeVideoElement._playHandler) {
-            activeVideoElement.removeEventListener("play", activeVideoElement._playHandler);
-        }
-        if (activeVideoElement._pauseHandler) {
-            activeVideoElement.removeEventListener("pause", activeVideoElement._pauseHandler);
-        }
-
-        const src = activeVideoElement.src;
-        activeVideoElement.src = '';
-        activeVideoElement.load();
-        if (src && src.startsWith('blob:')) {
-            URL.revokeObjectURL(src);
-        }
-
-        activeVideoElement = null;
-    }
-
-    const preview = document.getElementById("videoPreviewContainer");
-    if (preview) {
-        if (preview._clickHandler) {
-            preview.removeEventListener("click", preview._clickHandler);
-        }
-
-        if (preview.parentNode) {
-            preview.remove();
-        }
-    }
-}
-
-function removeVideo() {
-    const preview = document.getElementById("videoPreviewContainer");
-    if (preview) {
-        preview.classList.remove("visible");
-
-        setTimeout(() => {
-            cleanupPreviousVideo();
-            videoDropzone.removeAllFiles(true);
-            dropzoneArea.classList.remove("has-file");
-        }, 300);
-    }
-
-    startButton.disabled = true;
-    startButton.textContent = "Send and Process Video";
-    progressWrapper.classList.remove("active");
-    progressBar.style.width = "0%";
-    progressBar.style.background = "linear-gradient(90deg, #667eea, #764ba2)";
-    statusMessage.style.display = "none";
-    statusMessage.className = "status-message";
-}
-
 startButton.onclick = () => {
-    if (startButton.textContent === "Upload Another Video") {
+    const buttonText = startButton.querySelector('span');
+    if (buttonText.textContent === "Upload Another Video") {
         removeVideo();
         return;
     }
 
+    console.log('Starting upload...');
     progressWrapper.classList.add("active");
-    progressBar.style.background = "linear-gradient(90deg, #667eea, #764ba2)";
     progressBar.style.width = "0%";
     startButton.disabled = true;
     videoDropzone.processQueue();
@@ -294,51 +414,35 @@ videoDropzone.on("totaluploadprogress", (progress) => {
 });
 
 videoDropzone.on("sending", function() {
-    // Start progress checking when file upload begins
-    currentProgressPercentage = 0;
-    
-    // Initialize all stages as inactive
-    document.querySelectorAll('.pipeline-stage-modal').forEach(el => {
-        el.classList.remove('active', 'completed');
-    });
-
-    // Show modal and set initial active stage
-    currentStageTextModal.textContent = 'Preparing...';
-    setTimeout(() => {
-        loadingModal.classList.add("active");
-        // mark first stage active immediately for visual feedback
-        updateStageUI('segmentation');
-        updateStageText('segmentation');
-        // Start checking progress every 500ms
-        if (progressCheckInterval) clearInterval(progressCheckInterval);
-        progressCheckInterval = setInterval(checkPipelineProgress, 500);
-    }, 100);
+    console.log('Sending file...');
+    showProcessingModal();
 });
 
 videoDropzone.on("success", (file, response) => {
-    // Stop progress checking
-    if (progressCheckInterval) clearInterval(progressCheckInterval);
+    console.log('Upload success:', response);
     
     progressBar.style.background = "linear-gradient(90deg, #45d96f, #21a655)";
-    loadingModal.classList.remove("active");
+    hideProcessingModal();
 
     if (response.status === "success") {
-        // ⭐ REDIRECT TO RESULTS
+        console.log('Redirecting to:', response.redirect_url);
         window.location.href = response.redirect_url;
     } else {
         statusMessage.textContent = "✗ Processing failed";
         statusMessage.className = "status-message error";
         startButton.disabled = false;
-        startButton.textContent = "Try Again";
+        startButton.querySelector('span').textContent = "Try Again";
     }
 });
 
 videoDropzone.on("error", (file, errorMessage) => {
-    loadingModal.classList.remove("active");
+    console.error('Upload error:', errorMessage);
+    hideProcessingModal();
+    
     statusMessage.textContent = "✗ Upload error: " + errorMessage;
     statusMessage.className = "status-message error";
     startButton.disabled = false;
-    startButton.textContent = "Try Again";
+    startButton.querySelector('span').textContent = "Try Again";
 });
 
 videoDropzone.on("queuecomplete", () => {
@@ -355,3 +459,8 @@ videoDropzone.on("maxfilesexceeded", function(file) {
 });
 
 window.addEventListener("beforeunload", cleanupPreviousVideo);
+
+// Debug logging
+console.log('Dropzone handler initialized');
+console.log('Processing modal element:', processingModal ? 'Found' : 'NOT FOUND');
+console.log('Stage text element:', stageText ? 'Found' : 'NOT FOUND');

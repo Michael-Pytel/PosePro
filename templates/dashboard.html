@@ -1,0 +1,150 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Dashboard - PosePro Coach{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+{% endblock %}
+
+{% block content %}
+<section class="dashboard-section">
+    <div class="container-wide">
+        <!-- Header -->
+        <div class="dashboard-header">
+            <div>
+                <h1 class="dashboard-title">Welcome back, <span class="gradient-text">{{ user.username }}</span></h1>
+                <p class="dashboard-subtitle">Here's your exercise performance overview</p>
+            </div>
+            <a href="{% url 'upload_video' %}" class="btn btn-primary">
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                    <path d="M10 4V16M4 10H16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+                <span>New Analysis</span>
+            </a>
+        </div>
+
+        <!-- Statistics Overview -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+                        <path d="M16 28C22.6274 28 28 22.6274 28 16C28 9.37258 22.6274 4 16 4C9.37258 4 4 9.37258 4 16C4 22.6274 9.37258 28 16 28Z" stroke="currentColor" stroke-width="2"/>
+                        <path d="M16 10V16L20 20" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                </div>
+                <div class="stat-info">
+                    <h3 class="stat-value">{{ total_videos }}</h3>
+                    <p class="stat-label">Total Videos</p>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+                        <path d="M4 16L12 24L28 8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </div>
+                <div class="stat-info">
+                    <h3 class="stat-value">{{ total_reps }}</h3>
+                    <p class="stat-label">Total Reps</p>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+                        <circle cx="16" cy="16" r="12" stroke="currentColor" stroke-width="2"/>
+                        <path d="M11 16L15 20L22 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </div>
+                <div class="stat-info">
+                    <h3 class="stat-value">{{ correct_reps }}</h3>
+                    <p class="stat-label">Correct Reps</p>
+                </div>
+            </div>
+
+            <div class="stat-card highlight">
+                <div class="stat-icon">
+                    <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+                        <path d="M4 24L12 16L16 20L28 8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M20 8H28V16" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </div>
+                <div class="stat-info">
+                    <h3 class="stat-value">{{ average_accuracy }}%</h3>
+                    <p class="stat-label">Average Accuracy</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Videos -->
+        <div class="recent-section">
+            <div class="section-header-dash">
+                <h2>Recent Analyses</h2>
+                <a href="{% url 'upload_video' %}" class="view-all-link">
+                    Upload New
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                        <path d="M6 12L10 8L6 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </a>
+            </div>
+
+            {% if recent_videos %}
+                <div class="videos-grid">
+                    {% for video in recent_videos %}
+                        <div class="video-card">
+                            <div class="video-card-header">
+                                <div class="video-icon">📹</div>
+                                <div class="video-date">{{ video.uploaded_at|date:"M d, Y" }}</div>
+                            </div>
+                            
+                            <div class="video-stats">
+                                <div class="video-stat-item">
+                                    <span class="video-stat-label">Total Reps</span>
+                                    <span class="video-stat-value">{{ video.total_reps }}</span>
+                                </div>
+                                <div class="video-stat-item">
+                                    <span class="video-stat-label">Correct</span>
+                                    <span class="video-stat-value success">{{ video.correct_reps }}</span>
+                                </div>
+                                <div class="video-stat-item">
+                                    <span class="video-stat-label">Accuracy</span>
+                                    <span class="video-stat-value">{{ video.accuracy_percentage }}%</span>
+                                </div>
+                            </div>
+
+                            <div class="video-progress">
+                                <div class="progress-bar-container">
+                                    <div class="progress-bar-fill" style="width: {{ video.accuracy_percentage }}%"></div>
+                                </div>
+                            </div>
+
+                            {% if video.analysis %}
+                                <a href="{% url 'video_detail' video.id %}" class="video-view-btn">
+                                    <span>View Details</span>
+                                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                                        <path d="M6 12L10 8L6 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                </a>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="empty-state">
+                    <div class="empty-icon">📊</div>
+                    <h3>No analyses yet</h3>
+                    <p>Upload your first exercise video to get started</p>
+                    <a href="{% url 'upload_video' %}" class="btn btn-primary">
+                        <span>Upload Video</span>
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                            <path d="M10 4V16M4 10H16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,299 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}PosePro Coach - AI-Powered Exercise Form Analysis{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero">
+    <div class="container">
+        <div class="hero-content">
+            <div class="hero-badge">
+                <span class="badge-dot"></span>
+                <span>Powered by MediaPipe & Machine Learning</span>
+            </div>
+            
+            <h1 class="hero-title">
+                Perfect Your Form with
+                <span class="gradient-text">AI-Powered Analysis</span>
+            </h1>
+            
+            <p class="hero-subtitle">
+                Upload your workout videos and receive instant, detailed feedback on your exercise technique. 
+                Our advanced computer vision system analyzes your form in real-time, helping you train smarter and safer.
+            </p>
+            
+            <div class="hero-cta">
+                <a href="/upload/" class="btn btn-primary">
+                    <span>Try Demo</span>
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                        <path d="M4 10H16M16 10L11 5M16 10L11 15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </a>
+                <a href="#features" class="btn btn-secondary">Learn More</a>
+            </div>
+            
+            <div class="hero-stats">
+                <div class="stat">
+                    <div class="stat-value">92%+</div>
+                    <div class="stat-label">Accuracy</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value">Real-time</div>
+                    <div class="stat-label">Analysis</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value">Multiple</div>
+                    <div class="stat-label">Exercises</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="hero-visual">
+            <div class="visual-card">
+                <div class="visual-skeleton"></div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section id="features" class="features">
+    <div class="container">
+        <div class="section-header">
+            <h2 class="section-title">Advanced Form Analysis</h2>
+            <p class="section-subtitle">State-of-the-art computer vision technology for comprehensive exercise assessment</p>
+        </div>
+        
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+                        <path d="M16 4L4 10L16 16L28 10L16 4Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M4 16L16 22L28 16" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M4 22L16 28L28 22" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </div>
+                <h3 class="feature-title">Pose Estimation</h3>
+                <p class="feature-description">
+                    Advanced MediaPipe pose estimation tracks 33 body landmarks in real-time, 
+                    capturing every nuance of your movement.
+                </p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+                        <circle cx="16" cy="16" r="12" stroke="currentColor" stroke-width="2"/>
+                        <path d="M16 8V16L20 20" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                </div>
+                <h3 class="feature-title">Repetition Segmentation</h3>
+                <p class="feature-description">
+                    Automatically identifies and segments individual repetitions, 
+                    providing detailed analysis for each movement cycle.
+                </p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+                        <path d="M4 16H28" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        <path d="M16 4V28" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        <circle cx="16" cy="8" r="2" fill="currentColor"/>
+                        <circle cx="24" cy="16" r="2" fill="currentColor"/>
+                        <circle cx="16" cy="24" r="2" fill="currentColor"/>
+                        <circle cx="8" cy="16" r="2" fill="currentColor"/>
+                    </svg>
+                </div>
+                <h3 class="feature-title">Biomechanical Analysis</h3>
+                <p class="feature-description">
+                    Calculates joint angles and body positions to evaluate form quality 
+                    across multiple assessment criteria.
+                </p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+                        <rect x="4" y="4" width="24" height="24" rx="2" stroke="currentColor" stroke-width="2"/>
+                        <path d="M8 12L14 18L24 8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </div>
+                <h3 class="feature-title">Multi-Criteria Assessment</h3>
+                <p class="feature-description">
+                    Evaluates head position, hip alignment, elbow placement, and range of motion 
+                    using trained machine learning models.
+                </p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+                        <path d="M28 16C28 22.6274 22.6274 28 16 28C9.37258 28 4 22.6274 4 16C4 9.37258 9.37258 4 16 4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        <path d="M28 8V16H20" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </div>
+                <h3 class="feature-title">Visual Feedback</h3>
+                <p class="feature-description">
+                    Generates annotated videos with pose landmarks and assessment results 
+                    overlaid on your original footage.
+                </p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+                        <path d="M8 4H24C25.1046 4 26 4.89543 26 6V26C26 27.1046 25.1046 28 24 28H8C6.89543 28 6 27.1046 6 26V6C6 4.89543 6.89543 4 8 4Z" stroke="currentColor" stroke-width="2"/>
+                        <path d="M12 12H20" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        <path d="M12 16H20" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        <path d="M12 20H16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                </div>
+                <h3 class="feature-title">Detailed Reports</h3>
+                <p class="feature-description">
+                    Receive comprehensive reports with predictions for each repetition, 
+                    helping you track progress over time.
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- How It Works Section -->
+<section class="how-it-works">
+    <div class="container">
+        <div class="section-header">
+            <h2 class="section-title">How It Works</h2>
+            <p class="section-subtitle">Four simple steps to perfect form</p>
+        </div>
+        
+        <div class="steps-grid">
+            <div class="step">
+                <div class="step-number">01</div>
+                <h3 class="step-title">Upload Video</h3>
+                <p class="step-description">
+                    Record yourself performing pushups or squats and upload the video to our platform.
+                </p>
+            </div>
+            
+            <div class="step">
+                <div class="step-number">02</div>
+                <h3 class="step-title">AI Processing</h3>
+                <p class="step-description">
+                    Our system analyzes your video using MediaPipe pose estimation and machine learning models.
+                </p>
+            </div>
+            
+            <div class="step">
+                <div class="step-number">03</div>
+                <h3 class="step-title">Form Assessment</h3>
+                <p class="step-description">
+                    Get detailed feedback on technique including head position, hip alignment, and range of motion.
+                </p>
+            </div>
+            
+            <div class="step">
+                <div class="step-number">04</div>
+                <h3 class="step-title">Improve & Track</h3>
+                <p class="step-description">
+                    Review visualized results and repetition-by-repetition analysis to improve your form.
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Technology Section -->
+<section class="technology">
+    <div class="container">
+        <div class="tech-content">
+            <div class="tech-info">
+                <h2 class="section-title">Built with Cutting-Edge Technology</h2>
+                <p class="tech-description">
+                    PosePro Coach combines state-of-the-art computer vision, biomechanical analysis, 
+                    and machine learning to deliver professional-grade exercise form assessment.
+                </p>
+                
+                <div class="tech-list">
+                    <div class="tech-item">
+                        <div class="tech-check">
+                            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                                <path d="M4 10L8 14L16 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <h4>MediaPipe Pose Estimation</h4>
+                            <p>Real-time body landmark detection with 33-point tracking</p>
+                        </div>
+                    </div>
+                    
+                    <div class="tech-item">
+                        <div class="tech-check">
+                            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                                <path d="M4 10L8 14L16 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <h4>Random Forest Classifiers</h4>
+                            <p>Multi-label classification with 92%+ accuracy across criteria</p>
+                        </div>
+                    </div>
+                    
+                    <div class="tech-item">
+                        <div class="tech-check">
+                            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                                <path d="M4 10L8 14L16 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <h4>Biomechanical Feature Engineering</h4>
+                            <p>Advanced joint angle calculation and movement pattern analysis</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="tech-visual">
+                <div class="tech-card">
+                    <div class="code-block">
+                        <div class="code-header">
+                            <span class="code-dot"></span>
+                            <span class="code-dot"></span>
+                            <span class="code-dot"></span>
+                        </div>
+                        <div class="code-content">
+                            <div class="code-line"><span class="code-keyword">import</span> mediapipe <span class="code-keyword">as</span> mp</div>
+                            <div class="code-line"><span class="code-keyword">from</span> sklearn.ensemble <span class="code-keyword">import</span> RandomForestClassifier</div>
+                            <div class="code-line"></div>
+                            <div class="code-line"><span class="code-comment"># Initialize pose detection</span></div>
+                            <div class="code-line">pose = mp.solutions.pose.Pose()</div>
+                            <div class="code-line"></div>
+                            <div class="code-line"><span class="code-comment"># Analyze exercise form</span></div>
+                            <div class="code-line">results = analyze_form(video)</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="cta">
+    <div class="container">
+        <div class="cta-content">
+            <h2 class="cta-title">Ready to Perfect Your Form?</h2>
+            <p class="cta-subtitle">
+                Start analyzing your exercise technique today with AI-powered precision.
+            </p>
+            <a href="/upload/" class="btn btn-primary btn-large">
+                <span>Try Demo Now</span>
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                    <path d="M4 10H16M16 10L11 5M16 10L11 15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </a>
+        </div>
+    </div>
+</section>
+{% endblock %}

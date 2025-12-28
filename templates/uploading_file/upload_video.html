@@ -1,96 +1,153 @@
+{% extends 'base.html' %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Upload Video</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.9.3/min/dropzone.min.css" />
-    <link rel="stylesheet" href="{% static 'css/upload_video/common.css' %}">
-    <link rel="stylesheet" href="{% static 'css/upload_video/upload.css' %}">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.9.3/min/dropzone.min.js"></script>
-</head>
-<body>
 
-<div class="container" id="uploadView">
-    <h2>Upload Video</h2>
-    <p class="subtitle">Drag and drop your video file or click to browse</p>
+{% block title %}Upload Video - PosePro Coach{% endblock %}
 
-    <!-- Warning Box -->
-    <div class="warning-box">
-        <div class="warning-icon">⚠️</div>
-        <div class="warning-content">
-            <strong>Important:</strong> For accurate analysis, please record your video from the side view (profile angle).
-            Front or angled recordings may result in less accurate form assessment.
-        </div>
-    </div>
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.9.3/dropzone.min.css">
+<link rel="stylesheet" href="{% static 'css/upload_video/upload.css' %}">
+{% endblock %}
 
-    <div class="upload-area">
-        <form class="dropzone" id="dropzoneArea">
-            {% csrf_token %}
-        </form>
-    </div>
-
-    <div class="controls-area">
-        <button id="start" disabled>Send and Process Video</button>
-
-        <div class="progress-wrapper" id="progressWrapper">
-            <div class="progress-bar" id="dropzoneProgress"></div>
+{% block content %}
+<section class="upload-section">
+    <div class="container">
+        <div class="upload-header">
+            <div class="upload-badge">
+                <span class="badge-dot"></span>
+                <span>AI-Powered Form Analysis</span>
+            </div>
+            <h1 class="upload-title">Upload Your <span class="gradient-text">Exercise Video</span></h1>
+            <p class="upload-subtitle">
+                Upload your workout video and get instant feedback on your form and technique
+            </p>
         </div>
 
-        <div class="status-message" id="statusMessage"></div>
-    </div>
-</div>
+        <!-- Warning Box -->
+        <div class="warning-box">
+            <div class="warning-icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                    <path d="M12 9V13M12 17H12.01M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </div>
+            <div class="warning-content">
+                <strong>Important Recording Guidelines</strong>
+                <p>For accurate analysis, please record your video from the side view (profile angle). Front or angled recordings may result in less accurate form assessment.</p>
+            </div>
+        </div>
 
-<!-- Loading Modal -->
-<div class="modal" id="loadingModal">
-    <div class="modal-content">
-        <div class="spinner"></div>
-        <h3>Processing Video</h3>
-        <p>Analyzing your exercise... This may take a minute.</p>
+        <!-- Upload Area -->
+        <div class="upload-card">
+            <form class="dropzone" id="dropzoneArea">
+                {% csrf_token %}
+            </form>
+        </div>
+
+        <!-- Controls -->
+        <div class="controls-area">
+            <button id="start" class="btn btn-upload" disabled>
+                <span>Send and Process Video</span>
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                    <path d="M10 4V16M10 16L14 12M10 16L6 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </button>
+
+            <div class="progress-wrapper" id="progressWrapper">
+                <div class="progress-bar" id="dropzoneProgress"></div>
+            </div>
+
+            <div class="status-message" id="statusMessage"></div>
+        </div>
+    </div>
+</section>
+
+<!-- Processing Modal with New Design -->
+<div class="processing-modal" id="processingModal">
+    <div class="processing-modal-overlay"></div>
+    <div class="processing-modal-content">
+        <!-- Animated Background -->
+        <div class="modal-animated-bg"></div>
         
-        <!-- Pipeline Progress Bar -->
-        <div class="pipeline-progress-modal" id="pipelineProgressModal">
-            <div class="pipeline-stages-modal">
-                <div class="pipeline-stage-modal" data-stage="segmentation">
-                    <div class="stage-dot-modal"></div>
-                    <div class="stage-label-modal">Segmentation</div>
+        <!-- Header -->
+        <div class="modal-header">
+            <div class="modal-badge">
+                <span class="badge-dot pulse"></span>
+                <span>Processing</span>
+            </div>
+            <h2 class="modal-title">Analyzing Your <span class="gradient-text">Exercise Form</span></h2>
+            <p class="modal-subtitle">Our AI is examining your video. This typically takes 1-2 minutes.</p>
+        </div>
+
+        <!-- Spinner -->
+        <div class="spinner-container">
+            <div class="spinner-outer">
+                <div class="spinner-inner"></div>
+            </div>
+            <div class="spinner-glow"></div>
+        </div>
+
+        <!-- Progress Info -->
+        <div class="progress-info">
+            <div class="progress-stage" id="currentStage">
+                <span class="stage-icon">🔄</span>
+                <span class="stage-text" id="stageText">Preparing video...</span>
+            </div>
+            
+            <div class="progress-details">
+                <div class="detail-item">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                        <path d="M8 1V8L11 11" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        <circle cx="8" cy="8" r="7" stroke="currentColor" stroke-width="2"/>
+                    </svg>
+                    <span id="timeElapsed">0s</span>
                 </div>
-                <div class="pipeline-stage-modal" data-stage="landmarks">
-                    <div class="stage-dot-modal"></div>
-                    <div class="stage-label-modal">Landmarks</div>
-                </div>
-                <div class="pipeline-stage-modal" data-stage="angles">
-                    <div class="stage-dot-modal"></div>
-                    <div class="stage-label-modal">Angles</div>
-                </div>
-                <div class="pipeline-stage-modal" data-stage="aggregation">
-                    <div class="stage-dot-modal"></div>
-                    <div class="stage-label-modal">Aggregation</div>
-                </div>
-                <div class="pipeline-stage-modal" data-stage="prediction">
-                    <div class="stage-dot-modal"></div>
-                    <div class="stage-label-modal">Prediction</div>
+                <div class="detail-item">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                        <path d="M8 2V8H14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        <circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="2"/>
+                    </svg>
+                    <span id="currentStep">Step 1/5</span>
                 </div>
             </div>
-            <div class="pipeline-status-text-modal" id="pipelineStatusTextModal">
-                <span id="currentStageTextModal">Preparing...</span>
+        </div>
+
+        <!-- Steps Indicator -->
+        <div class="steps-indicator">
+            <div class="step-item" data-step="segmentation">
+                <div class="step-dot"></div>
+                <span class="step-label">Segment</span>
             </div>
+            <div class="step-connector"></div>
+            <div class="step-item" data-step="landmarks">
+                <div class="step-dot"></div>
+                <span class="step-label">Landmarks</span>
+            </div>
+            <div class="step-connector"></div>
+            <div class="step-item" data-step="angles">
+                <div class="step-dot"></div>
+                <span class="step-label">Angles</span>
+            </div>
+            <div class="step-connector"></div>
+            <div class="step-item" data-step="aggregation">
+                <div class="step-dot"></div>
+                <span class="step-label">Aggregate</span>
+            </div>
+            <div class="step-connector"></div>
+            <div class="step-item" data-step="prediction">
+                <div class="step-dot"></div>
+                <span class="step-label">Predict</span>
+            </div>
+        </div>
+
+        <!-- Tips Section -->
+        <div class="processing-tips">
+            <h4>Did you know?</h4>
+            <p id="processingTip">Our AI analyzes 33 body landmarks in real-time to assess your exercise form.</p>
         </div>
     </div>
 </div>
+{% endblock %}
 
-<!-- Error Modal -->
-<div class="modal" id="errorModal">
-    <div class="modal-content error">
-        <div class="error-icon">❌</div>
-        <h3>Upload Error</h3>
-        <p id="errorMessage"></p>
-        <button onclick="closeErrorModal()">OK</button>
-    </div>
-</div>
-
+{% block extra_js %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.9.3/dropzone.min.js"></script>
 <script src="{% static 'js/upload_video/dropzone-handler.js' %}"></script>
-
-</body>
-</html>
+{% endblock %}

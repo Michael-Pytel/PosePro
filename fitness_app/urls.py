@@ -18,14 +18,26 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path
-
-from fitness_app.views import upload_video, results_view, get_pipeline_progress
+from . import views
+from .views_auth import register_view, login_view, logout_view, dashboard_view, video_detail_view
 
 urlpatterns = [
-    path('upload/', upload_video, name='upload_video'),
-    path('results/', results_view, name='results'),
-    path('api/progress/', get_pipeline_progress, name='get_progress'),
-    path('admin/', admin.site.urls),
+    # Home and main pages
+    path('', views.home, name='home'),
+    path('upload/', views.upload_video, name='upload_video'),
+    path('results/', views.results_view, name='results_view'),
+    
+    # Authentication
+    path('register/', register_view, name='register'),
+    path('login/', login_view, name='login'),
+    path('logout/', logout_view, name='logout'),
+    
+    # Dashboard
+    path('dashboard/', dashboard_view, name='dashboard'),
+    path('video/<int:video_id>/', video_detail_view, name='video_detail'),
+    
+    # API
+    path('api/progress/', views.get_progress, name='get_progress'),
 ]
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

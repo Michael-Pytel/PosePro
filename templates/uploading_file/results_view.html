@@ -1,36 +1,59 @@
+{% extends 'base.html' %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Analysis Results</title>
-    <link rel="stylesheet" href="{% static 'css/upload_video/common.css' %}">
-    <link rel="stylesheet" href="{% static 'css/upload_video/results.css' %}">
-</head>
-<body>
 
-<div class="container wide">
-    <a href="/" class="back-button">← Upload New Video</a>
+{% block title %}Analysis Results - PosePro Coach{% endblock %}
 
-    <div class="results-header">
-        <h2>Analysis Results</h2>
-        <p class="subtitle">Your exercise has been analyzed</p>
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/upload_video/results.css' %}">
+{% endblock %}
+
+{% block content %}
+<section class="results-section">
+    <div class="container-wide">
+        <!-- Header with Back Button -->
+        <div class="results-header">
+            <a href="/upload/" class="back-button">
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                    <path d="M16 10H4M4 10L10 16M4 10L10 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <span>Upload New Video</span>
+            </a>
+            
+            <div class="results-title-section">
+                <div class="results-badge">
+                    <span class="badge-dot"></span>
+                    <span>Analysis Complete</span>
+                </div>
+                <h1 class="results-title">
+                    Your <span class="gradient-text">Analysis Results</span>
+                </h1>
+                <p class="results-subtitle">Detailed breakdown of your exercise performance</p>
+            </div>
+        </div>
+
+        <!-- Statistics Cards -->
+        <div class="results-stats" id="resultsStats"></div>
+
+        <!-- Full Video Analysis -->
+        <div class="results-video-section" id="resultsVideoContainer"></div>
+
+        <!-- Individual Repetitions -->
+        <div class="repetitions-section">
+            <div class="section-header-inline">
+                <h2>Individual Repetitions</h2>
+                <p>Detailed analysis for each repetition</p>
+            </div>
+            <div class="clips-grid" id="clipsGrid"></div>
+        </div>
     </div>
+</section>
 
-    <div class="results-stats" id="resultsStats"></div>
-
-    <div class="results-video" id="resultsVideoContainer"></div>
-
-    <h3 style="margin-bottom: 20px;">Individual Repetitions</h3>
-    <div class="clips-grid" id="clipsGrid"></div>
-</div>
-
-<!-- ⭐ EMBED DATA -->
+<!-- Embed Data -->
 <script>
     window.RESULTS_DATA = {{ results_data|safe }};
 </script>
-<script src="{% static 'js/upload_video/results-display.js' %}"></script>
+{% endblock %}
 
-</body>
-</html>
+{% block extra_js %}
+<script src="{% static 'js/upload_video/results-display.js' %}"></script>
+{% endblock %}

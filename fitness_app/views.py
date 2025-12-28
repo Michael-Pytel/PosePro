@@ -16,6 +16,29 @@ MAX_FILE_SIZE = 100 * 1024 * 1024
 # Global dict to store progress for each video upload session
 PIPELINE_PROGRESS = {}
 
+
+from django.http import JsonResponse
+
+# Add this function to your views.py
+def get_progress(request):
+    """
+    API endpoint to return current pipeline processing progress
+    """
+    # You should have a global or session variable tracking progress
+    # For now, return a basic structure
+    
+    # If you have a session-based progress tracker:
+    progress_data = request.session.get('PIPELINE_PROGRESS', {
+        'current_stage': 'idle',
+        'progress': 0
+    })
+    
+    return JsonResponse(progress_data)
+    
+def home(request):
+    """Home page view"""
+    return render(request, "index.html")
+
 def update_pipeline_progress(session_id, stage, progress):
     """Update progress for a specific pipeline stage"""
     if session_id not in PIPELINE_PROGRESS:
@@ -111,6 +134,7 @@ def process_video_with_tracking(session_id, script_path, folder_path, output_pat
         print(f"Error in process_video_with_tracking: {e}")
         update_pipeline_progress(session_id, 'error', 0)
 
+
 def upload_video(request):
     if request.method == "POST":
         session_id = request.session.session_key
@@ -199,8 +223,8 @@ def upload_video(request):
                 "message": "Video processed successfully",
                 "redirect_url": "/results/"
             })
-
-        return redirect("/upload/")
+        
+        return redirect("/results/")
     return render(request, "uploading_file/upload_video.html")
 
 

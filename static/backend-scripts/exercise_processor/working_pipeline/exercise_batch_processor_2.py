@@ -485,7 +485,7 @@ class ExerciseBatchProcessor:
         Ekstrakcja landmarks z wideo
         """
         MODEL_PATH = Path(
-            r"C:\Users\micha\Documents\camera-based-exercise-evaluation\django-app\static\backend-scripts\exercise_processor\model\pose_landmarker_full.task"
+            r"C:\Users\jakub\Documents\Inzynierka\django-app\static\backend-scripts\exercise_processor\model\pose_landmarker_heavy.task"
         ).resolve()
         print("MODEL PATH:", MODEL_PATH, MODEL_PATH.exists())  # DEBUG!
 

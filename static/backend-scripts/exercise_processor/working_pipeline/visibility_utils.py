@@ -12,7 +12,8 @@ def compute_visibility_scores(landmarks_data, key_points):
 
         for frame in landmarks_data:
             lm = frame["landmarks"]
-            if kp not in lm:
+            lm_len = len(lm)
+            if kp >= lm_len:
                 missing += 1
                 continue
             

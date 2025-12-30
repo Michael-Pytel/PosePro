@@ -6,25 +6,7 @@ import cv2
 def detect_video_rotation(video_path: str, debug: bool) -> int:
     """Detecting video rotation from metadata using ffprobe"""
     try:
-        # Using ffprobe to get rotation metadata
-        cmd_rotate = [
-            'ffprobe', '-v', 'error',
-            '-select_streams', 'v:0',
-            '-show_entries', 'stream_tags=rotate',
-            '-of', 'default=noprint_wrappers=1:nokey=1',
-            video_path
-        ]
-        result_rotate = subprocess.run(cmd_rotate, capture_output=True, text=True)
-        
-        if result_rotate.returncode == 0:
-            txt = result_rotate.stdout.strip()
-            if txt and txt.isdigit():
-                rotation = int(txt)
-                if debug:
-                    print("Detected rotate tag:", rotation)
-                return rotation
-        
-        # Alternative: check display_matrix for rotation
+        # Using: check display_matrix for rotation
         cmd_matrix = [
             'ffprobe', '-v', 'error',
             '-select_streams', 'v:0',
@@ -39,7 +21,7 @@ def detect_video_rotation(video_path: str, debug: bool) -> int:
             if txt:
                 match = re.search(r'-?\d+', txt)
                 if match:
-                    rotation = abs(int(float(match.group())))
+                    rotation = abs(int(float(match.group()))) if int(float(match.group()))<= 0 else 270
                     if debug:
                         print("Detected rotation from display matrix:", rotation)
                     return rotation

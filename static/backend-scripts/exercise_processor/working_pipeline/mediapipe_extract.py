@@ -115,40 +115,40 @@ def extract_landmarks(landmarker, video_path: str) -> List[Dict]:
     
     return landmarks_data
 
-def visualize_keypoint_y_over_frames(landmarks_data, key_points):
-    """
-    Rysuje wykres: X = numer klatki, Y = pozycja Y znormalizowana dla wybranych landmarków.
-    """
-    # przygotowanie słownika trajektorii
-    trajectories = {kp: {'frame': [], 'y': []} for kp in key_points}
-
-    # zbieranie danych
-    for entry in landmarks_data:
-        frame = entry['frame']
-        lm = entry['landmarks']
-
-        for kp in key_points:
-            if kp in lm:
-                trajectories[kp]['frame'].append(frame)
-                trajectories[kp]['y'].append(lm[kp]['y'])  # znormalizowane Y
-
-    # rysowanie wykresu
-    plt.figure(figsize=(12, 6))
-    plt.title("Trajektorie pozycji Y kluczowych landmarków w czasie (klatki)")
-    
-    for kp in key_points:
-        plt.plot(trajectories[kp]['frame'],
-                 trajectories[kp]['y'],
-                 linewidth=1,
-                 label=f"LM {kp}")
-
-    plt.xlabel("Frame (klatki)")
-    plt.ylabel("Y (znormalizowane)")
-    plt.gca().invert_yaxis()   # bo w obrazie Y rośnie w dół
-    plt.grid(True)
-    plt.legend()
-    plt.tight_layout()
-    plt.show()   # ⭐ POJAWI SIĘ OKNO Z WYKRESEM
+# def visualize_keypoint_y_over_frames(landmarks_data, key_points):
+#     """
+#     Rysuje wykres: X = numer klatki, Y = pozycja Y znormalizowana dla wybranych landmarków.
+#     """
+#     # przygotowanie słownika trajektorii
+#     trajectories = {kp: {'frame': [], 'y': []} for kp in key_points}
+#
+#     # zbieranie danych
+#     for entry in landmarks_data:
+#         frame = entry['frame']
+#         lm = entry['landmarks']
+#
+#         for kp in key_points:
+#             if kp in lm:
+#                 trajectories[kp]['frame'].append(frame)
+#                 trajectories[kp]['y'].append(lm[kp]['y'])  # znormalizowane Y
+#
+#     # rysowanie wykresu
+#     plt.figure(figsize=(12, 6))
+#     plt.title("Trajektorie pozycji Y kluczowych landmarków w czasie (klatki)")
+#
+#     for kp in key_points:
+#         plt.plot(trajectories[kp]['frame'],
+#                  trajectories[kp]['y'],
+#                  linewidth=1,
+#                  label=f"LM {kp}")
+#
+#     plt.xlabel("Frame (klatki)")
+#     plt.ylabel("Y (znormalizowane)")
+#     plt.gca().invert_yaxis()   # bo w obrazie Y rośnie w dół
+#     plt.grid(True)
+#     plt.legend()
+#     plt.tight_layout()
+#     plt.show()   # ⭐ POJAWI SIĘ OKNO Z WYKRESEM
 
 
 if __name__ == "__main__":

@@ -8,30 +8,25 @@ def cubic_interp(p0, p1, p2, p3, t):
                   (2*p0 - 5*p1 + 4*p2 - p3) * t2 +
                   (-p0 + 3*p1 - 3*p2 + p3) * t3)
 
+
 def interpolate_nans(signal):
-    y = signal.copy()
-    n = len(y)
+    y = np.array(signal, float, copy=True)
+    known_idx = np.where(~np.isnan(y))[0]
+    if known_idx.size == 0:
+        return y
 
-    idx = np.arange(n)
-    mask = ~np.isnan(y)
-    known = idx[mask]
-    for i in np.where(~mask)[0]:
-        lefti = known[known < i][-1]
-        righti = known[known > i][0]
+    first_known, last_known = known_idx[0], known_idx[-1]
+    y[:first_known] = y[first_known]
+    y[last_known+1:] = y[last_known]
 
-        left2 = max(lefti - 1, known[0])
-        right2 = min(righti + 1, known[-1])
-
-        # pobieramy wartości
-        p0 = y[left2]
-        p1 = y[lefti]
-        p2 = y[righti]
-        p3 = y[right2]
-
-        # Normalized parameter
-        t = (i - lefti) / (righti - lefti)
-        y[i] = cubic_interp(p0, p1, p2, p3, t)
-
+    known_idx = np.where(~np.isnan(y))[0]
+    for missing_i in np.where(np.isnan(y))[0]:
+        left_known = known_idx[known_idx < missing_i][-1]
+        right_known = known_idx[known_idx > missing_i][0]
+        left_support = max(left_known - 1, known_idx[0])
+        right_support = min(right_known + 1, known_idx[-1])
+        t = (missing_i - left_known) / (right_known - left_known)
+        y[missing_i] = cubic_interp(y[left_support], y[left_known], y[right_known], y[right_support], t)
     return y
 
 # def interpolate_nans(signal):

@@ -170,7 +170,6 @@ def cut_video_segments(video_path, repetitions, output_dir):
 #     cut_video_segments(video_path, reps, output_path)
 #     return True
 
-from report_repetition_tools import test
 # if __name__ == "__main__":
 #     video_path = r"C:\Users\jakub\Documents\Inzynierka\camera-based-exercise-evaluation\data\recordings\own_recordings\pushups\wszystkie_nagrania\athlete0026\athlete0026_2.MP4"
 #     csv = pd.read_csv("pipeline_full_evaluation_report.csv")

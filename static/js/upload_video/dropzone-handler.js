@@ -31,7 +31,7 @@ const processingTips = [
 
 // Initialize Dropzone
 let videoDropzone = new Dropzone("#dropzoneArea", {
-    url: '/upload/',
+    url: '/demo/upload/',
     maxFiles: 1,
     paramName: "video",
     acceptedFiles: "video/*",

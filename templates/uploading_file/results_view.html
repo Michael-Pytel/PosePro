@@ -12,7 +12,7 @@
     <div class="container-wide">
         <!-- Header with Back Button -->
         <div class="results-header">
-            <a href="/upload/" class="back-button">
+            <a href="/demo/upload/" class="back-button">
                 <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
                     <path d="M16 10H4M4 10L10 16M4 10L10 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                 </svg>
@@ -32,10 +32,25 @@
         </div>
 
         <!-- Statistics Cards -->
-        <div class="results-stats" id="resultsStats"></div>
+        <div class="results-stats" id="resultsStats">
+            <div class="stat-card">
+                <h4>{{ total_reps }}</h4>
+                <p>Total Repetitions</p>
+            </div>
+            <div class="stat-card">
+                <h4>{{ repetition_clips|length }}</h4>
+                <p>Analyzed Clips</p>
+            </div>
+            <div class="stat-card">
+                <h4>✓</h4>
+                <p>Analysis Complete</p>
+            </div>
+        </div>
 
-        <!-- Full Video Analysis -->
-        <div class="results-video-section" id="resultsVideoContainer"></div>
+        <!-- Full Video Analysis (if you have it) -->
+        <div class="results-video-section" id="resultsVideoContainer">
+            <!-- Add full video here later if needed -->
+        </div>
 
         <!-- Individual Repetitions -->
         <div class="repetitions-section">
@@ -43,17 +58,38 @@
                 <h2>Individual Repetitions</h2>
                 <p>Detailed analysis for each repetition</p>
             </div>
-            <div class="clips-grid" id="clipsGrid"></div>
+            <div class="clips-grid" id="clipsGrid">
+                {% for clip in repetition_clips %}
+                <div class="clip-card">
+                    <video controls preload="metadata">
+                        <source src="{{ clip.path }}" type="video/mp4">
+                        Your browser does not support the video tag.
+                    </video>
+                    <div class="clip-card-info">
+                        <h5>Repetition #{{ forloop.counter }}</h5>
+                        <p>{{ clip.filename }}</p>
+                        
+                        <!-- Predictions will go here when you add them -->
+                        <!-- <div class="clip-predictions">
+                            <h6>Form Assessment:</h6>
+                            <ul>
+                                <li>
+                                    <strong>Head Position:</strong>
+                                    <span class="prediction-correct">Correct</span>
+                                </li>
+                            </ul>
+                        </div> -->
+                    </div>
+                </div>
+                {% empty %}
+                <p style="text-align: center; color: var(--text-muted); grid-column: 1 / -1;">No repetition clips found.</p>
+                {% endfor %}
+            </div>
         </div>
     </div>
 </section>
-
-<!-- Embed Data -->
-<script>
-    window.RESULTS_DATA = {{ results_data|safe }};
-</script>
 {% endblock %}
 
 {% block extra_js %}
-<script src="{% static 'js/upload_video/results-display.js' %}"></script>
+<script src="{% static 'js/upload_video/results-simple.js' %}"></script>
 {% endblock %}

@@ -24,8 +24,10 @@ from . import views
 urlpatterns = [
     # Home and main pages
     path('', views.home, name='home'),
-    path('upload/', views.upload_video, name='upload_video'),
-    path('results/', views.results_view, name='results_view'),
+    
+    # Demo section
+    path('demo/upload/', views.upload_video, name='demo_upload'),
+    path('demo/results/', views.results_view, name='demo_results'),
     
     # Authentication
     # path('register/', register_view, name='register'),

@@ -19,7 +19,7 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path
 from . import views
-from .views_auth import register_view, login_view, logout_view, dashboard_view, video_detail_view
+# from .views_auth import register_view, login_view, logout_view, dashboard_view, video_detail_view
 
 urlpatterns = [
     # Home and main pages
@@ -28,16 +28,16 @@ urlpatterns = [
     path('results/', views.results_view, name='results_view'),
     
     # Authentication
-    path('register/', register_view, name='register'),
-    path('login/', login_view, name='login'),
-    path('logout/', logout_view, name='logout'),
+    # path('register/', register_view, name='register'),
+    # path('login/', login_view, name='login'),
+    # path('logout/', logout_view, name='logout'),
     
     # Dashboard
-    path('dashboard/', dashboard_view, name='dashboard'),
-    path('video/<int:video_id>/', video_detail_view, name='video_detail'),
+    # path('dashboard/', dashboard_view, name='dashboard'),
+    # path('video/<int:video_id>/', video_detail_view, name='video_detail'),
     
     # API
-    path('api/progress/', views.get_progress, name='get_progress'),
+    # path('api/progress/', views.get_progress, name='get_progress'),
 ]
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

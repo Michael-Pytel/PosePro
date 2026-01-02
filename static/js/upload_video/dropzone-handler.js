@@ -9,50 +9,14 @@ const dropzoneArea = document.getElementById("dropzoneArea");
 const processingModal = document.getElementById("processingModal");
 const stageText = document.getElementById("stageText");
 const timeElapsed = document.getElementById("timeElapsed");
-const currentStep = document.getElementById("currentStep");
 const processingTip = document.getElementById("processingTip");
 
 // State
 let activeTimeouts = [];
 let activeVideoElement = null;
-let progressCheckInterval = null;
 let startTime = null;
 let timerInterval = null;
 let currentTipIndex = 0;
-
-// Stage configuration
-const stageConfig = {
-    'segmentation': {
-        name: 'Segmenting repetitions...',
-        icon: '✂️',
-        step: 1,
-        description: 'Identifying individual exercise repetitions in your video'
-    },
-    'landmarks': {
-        name: 'Extracting pose landmarks...',
-        icon: '🎯',
-        step: 2,
-        description: 'Detecting 33 body landmarks for biomechanical analysis'
-    },
-    'angles': {
-        name: 'Calculating joint angles...',
-        icon: '📐',
-        step: 3,
-        description: 'Computing angles at key joints to assess form'
-    },
-    'aggregation': {
-        name: 'Aggregating features...',
-        icon: '📊',
-        step: 4,
-        description: 'Combining movement data for comprehensive analysis'
-    },
-    'prediction': {
-        name: 'Making predictions...',
-        icon: '🤖',
-        step: 5,
-        description: 'AI model evaluating your exercise technique'
-    }
-};
 
 // Tips to display during processing
 const processingTips = [
@@ -116,85 +80,6 @@ function rotateTip() {
     }, 300);
 }
 
-function updateStageUI(stage) {
-    console.log('Updating to stage:', stage);
-    
-    const config = stageConfig[stage];
-    if (!config) {
-        console.warn('Unknown stage:', stage);
-        return;
-    }
-    
-    // Update stage text
-    const stageIcon = document.querySelector('.stage-icon');
-    if (stageIcon) {
-        stageIcon.textContent = config.icon;
-    }
-    
-    if (stageText) {
-        stageText.textContent = config.name;
-    }
-    
-    // Update step counter
-    if (currentStep) {
-        currentStep.textContent = `Step ${config.step}/5`;
-    }
-    
-    // Update step indicators
-    const allSteps = document.querySelectorAll('.step-item');
-    allSteps.forEach(step => {
-        const stepStage = step.getAttribute('data-step');
-        step.classList.remove('active', 'completed');
-        
-        // Mark completed steps
-        const stepConfig = stageConfig[stepStage];
-        if (stepConfig && stepConfig.step < config.step) {
-            step.classList.add('completed');
-        }
-        // Mark current step
-        else if (stepStage === stage) {
-            step.classList.add('active');
-        }
-    });
-}
-
-function checkPipelineProgress() {
-    fetch('/api/progress/')
-        .then(response => response.json())
-        .then(data => {
-            console.log('Progress data:', data);
-            
-            const currentStage = data.current_stage;
-            const progress = data.progress;
-            
-            if (currentStage && currentStage !== 'idle') {
-                if (currentStage !== 'complete' && currentStage !== 'error') {
-                    updateStageUI(currentStage);
-                }
-                
-                // If processing complete, stop polling
-                if (currentStage === 'complete') {
-                    clearInterval(progressCheckInterval);
-                    clearInterval(timerInterval);
-                    
-                    // Mark all steps as completed
-                    document.querySelectorAll('.step-item').forEach(step => {
-                        step.classList.remove('active');
-                        step.classList.add('completed');
-                    });
-                    
-                    if (stageText) {
-                        stageText.textContent = 'Analysis complete!';
-                    }
-                } else if (currentStage === 'error') {
-                    clearInterval(progressCheckInterval);
-                    clearInterval(timerInterval);
-                }
-            }
-        })
-        .catch(error => console.error('Progress check error:', error));
-}
-
 function showProcessingModal() {
     console.log('Showing processing modal');
     
@@ -214,8 +99,8 @@ function showProcessingModal() {
         timeElapsed.textContent = '0s';
     }
     
-    if (currentStep) {
-        currentStep.textContent = 'Step 1/5';
+    if (stageText) {
+        stageText.textContent = 'Processing your video...';
     }
     
     // Start timer
@@ -224,21 +109,11 @@ function showProcessingModal() {
     
     // Rotate tips every 8 seconds
     setInterval(rotateTip, 8000);
-    
-    // Start with first stage
-    setTimeout(() => {
-        updateStageUI('segmentation');
-        
-        // Start progress polling
-        if (progressCheckInterval) clearInterval(progressCheckInterval);
-        progressCheckInterval = setInterval(checkPipelineProgress, 500);
-    }, 500);
 }
 
 function hideProcessingModal() {
     processingModal.classList.remove('active');
     if (timerInterval) clearInterval(timerInterval);
-    if (progressCheckInterval) clearInterval(progressCheckInterval);
 }
 
 // Video Preview Functions

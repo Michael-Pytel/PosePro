@@ -9,19 +9,18 @@ class UploadingProcessor:
     def __init__(self):
         pass
     def _process_video(self, video_path):
+        output_dir = "output_cuts"
         all_data, rotation, fps = extract_landmarks_from_video(video_path)
         # Function below is only for testing not for final solution
-        # draw_landmarks_on_video(video_path, all_data, "output_landmarks")
+        # draw_landmarks_on_video(video_path, all_data, output_dir)
         signals, visibility_scores = compute_pushup_signals(all_data, fps)
         repetitions = detect_pushup_repetitions(signals, all_data, visibility_scores, fps)
-        output_dir = ""
-        # cut_video_segments(video_path, repetitions, output_dir)
+        cut_video_segments(video_path, repetitions, output_dir)
         for rep in repetitions:
             test(signals, visibility_scores, rep, fps)
         return True
-`
 
 if __name__ == "__main__":
-    video_path = r"C:\Users\jakub\Documents\Inzynierka\camera-based-exercise-evaluation\data\recordings\own_recordings\pushups\wszystkie_nagrania\athlete0022\jakubpol1.mp4"
+    video_path = "C:\\Users\\micha\\Downloads\\rncNGvYT.mp4"
     uploading_processor = UploadingProcessor()
     uploading_processor._process_video(video_path)

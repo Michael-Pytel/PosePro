@@ -1,5 +1,5 @@
 import numpy as np
-from typing import Optional
+from typing import Dict, Optional, Any
 from dataclasses import dataclass
 
 @dataclass(frozen=True)
@@ -101,3 +101,46 @@ def test(signal, visibility_scores, repetition, fps):
     which_signal = choose_elbow_visibility(visibility_scores)
     print(compute_timing_metrics(signal[which_signal], repetition["start_frame"], repetition["end_frame"], repetition["bottom_frame"], fps))
     print(compute_rom_metrics(signal[which_signal], repetition["start_frame"], repetition["end_frame"], repetition["bottom_frame"], fps))
+
+def get_timing(signal, visibility_scores, repetition, fps) -> Dict[str, Any]:
+
+    which_signal = choose_elbow_visibility(visibility_scores)
+    
+    timing = compute_timing_metrics(
+        signal[which_signal],
+        repetition["start_frame"],
+        repetition["end_frame"],
+        repetition["bottom_frame"],
+        fps
+    )
+    
+    return {
+        'down_time': timing.down_time_s,
+        'up_time': timing.up_time_s,
+        'rep_time': timing.rep_time_s,
+        'bottom_pause': timing.bottom_pause_s,
+        'pause_frames': [timing.pause_start_frame, timing.pause_end_frame] 
+                       if timing.pause_start_frame is not None else None
+    }
+
+
+def get_rom(signal, visibility_scores, repetition, fps) -> Dict[str, Any]:
+    
+    which_signal = choose_elbow_visibility(visibility_scores)
+    
+    rom = compute_rom_metrics(
+        signal[which_signal],
+        repetition["start_frame"],
+        repetition["end_frame"],
+        repetition["bottom_frame"],
+        fps
+    )
+    
+    return {
+        'max_elbow_angle': rom.max_elbow_angle,
+        'min_elbow_angle': rom.min_elbow_angle,
+        'range_of_motion': rom.range_of_motion,
+        'full_depth': rom.full_depth,
+        'full_lockout': rom.full_lockout,
+        'is_complete_rep': rom.is_rep_full
+    }

@@ -31,65 +31,253 @@
             </div>
         </div>
 
-        <!-- Statistics Cards -->
-        <div class="results-stats" id="resultsStats">
-            <div class="stat-card">
-                <h4>{{ total_reps }}</h4>
-                <p>Total Repetitions</p>
+        <!-- Overall Statistics -->
+        <div class="overall-stats-wrapper">
+            <div class="results-stats" id="resultsStats">
+                <div class="stat-card">
+                    <h4>{{ overall_statistics.total_reps }}</h4>
+                    <p>Total Repetitions</p>
+                </div>
+                <div class="stat-card">
+                    <h4>{{ overall_statistics.complete_reps }}</h4>
+                    <p>Complete Reps</p>
+                </div>
+                <div class="stat-card">
+                    <h4>{{ overall_statistics.completion_rate }}</h4>
+                    <p>Completion Rate</p>
+                </div>
+                <div class="stat-card">
+                    <h4>{{ overall_statistics.average_rep_time }}</h4>
+                    <p>Average Rep Time</p>
+                </div>
             </div>
-            <div class="stat-card">
-                <h4>{{ repetition_clips|length }}</h4>
-                <p>Analyzed Clips</p>
-            </div>
-            <div class="stat-card">
-                <h4>✓</h4>
-                <p>Analysis Complete</p>
+
+            <!-- Form Quality Summary -->
+            <div class="form-quality-summary">
+                <h3>Form Quality Summary</h3>
+                <div class="quality-badges">
+                    <div class="quality-badge {% if overall_statistics.form_checks_summary.full_depth == '17/17' %}perfect{% endif %}">
+                        <span class="badge-label">Full Depth</span>
+                        <span class="badge-value">{{ overall_statistics.form_checks_summary.full_depth }}</span>
+                    </div>
+                    <div class="quality-badge {% if overall_statistics.form_checks_summary.full_lockout == '17/17' %}perfect{% endif %}">
+                        <span class="badge-label">Full Lockout</span>
+                        <span class="badge-value">{{ overall_statistics.form_checks_summary.full_lockout }}</span>
+                    </div>
+                    <div class="quality-badge {% if overall_statistics.form_checks_summary.hip_alignment == '17/17' %}perfect{% endif %}">
+                        <span class="badge-label">Hip Alignment</span>
+                        <span class="badge-value">{{ overall_statistics.form_checks_summary.hip_alignment }}</span>
+                    </div>
+                    <div class="quality-badge {% if overall_statistics.form_checks_summary.body_position == '17/17' %}perfect{% endif %}">
+                        <span class="badge-label">Body Position</span>
+                        <span class="badge-value">{{ overall_statistics.form_checks_summary.body_position }}</span>
+                    </div>
+                    <div class="quality-badge {% if overall_statistics.form_checks_summary.head_position == '17/17' %}perfect{% endif %}">
+                        <span class="badge-label">Head Position</span>
+                        <span class="badge-value">{{ overall_statistics.form_checks_summary.head_position }}</span>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <!-- Full Video Analysis (if you have it) -->
-        <div class="results-video-section" id="resultsVideoContainer">
-            <!-- Add full video here later if needed -->
-        </div>
-
-        <!-- Individual Repetitions -->
+        <!-- Individual Repetitions List View -->
         <div class="repetitions-section">
-            <div class="section-header-inline">
-                <h2>Individual Repetitions</h2>
-                <p>Detailed analysis for each repetition</p>
+            <div class="section-header-with-actions">
+                <div class="section-header-inline">
+                    <h2>Individual Repetitions</h2>
+                    <p>Detailed analysis for each repetition</p>
+                </div>
+                <button class="expand-all-btn" id="expandAllBtn">
+                    Expand All Details
+                </button>
             </div>
-            <div class="clips-grid" id="clipsGrid">
+
+            <div class="reps-list" id="repsList">
                 {% for clip in repetition_clips %}
-                <div class="clip-card">
-                    <video controls preload="metadata">
-                        <source src="{{ clip.path }}" type="video/mp4">
-                        Your browser does not support the video tag.
-                    </video>
-                    <div class="clip-card-info">
-                        <h5>Repetition #{{ forloop.counter }}</h5>
-                        <p>{{ clip.filename }}</p>
+                <div class="rep-item" data-rep="{{ clip.rep_number }}">
+                    <!-- Rep Header -->
+                    <div class="rep-header">
+                        <div class="rep-video-thumbnail">
+                            <video preload="metadata">
+                                <source src="{{ clip.video_url }}#t=0.5" type="video/mp4">
+                            </video>
+                            <div class="play-overlay">▶</div>
+                        </div>
                         
-                        <!-- Predictions will go here when you add them -->
-                        <!-- <div class="clip-predictions">
-                            <h6>Form Assessment:</h6>
-                            <ul>
-                                <li>
-                                    <strong>Head Position:</strong>
-                                    <span class="prediction-correct">Correct</span>
-                                </li>
-                            </ul>
-                        </div> -->
+                        <div class="rep-main-info">
+                            <div class="rep-title-row">
+                                <h3>Repetition #{{ clip.rep_number }}</h3>
+                                <span class="rep-time-badge">{{ clip.metrics.summary.total_time }}</span>
+                            </div>
+                            
+                            <div class="rep-quick-stats">
+                                <span class="quick-stat">
+                                    <span class="stat-icon">⬇</span> {{ clip.metrics.summary.down_time }}
+                                </span>
+                                <span class="quick-stat">
+                                    <span class="stat-icon">⬆</span> {{ clip.metrics.summary.up_time }}
+                                </span>
+                                <span class="quick-stat">
+                                    <span class="stat-icon">📐</span> {{ clip.metrics.summary.rom }}
+                                </span>
+                            </div>
+                            
+                            <!-- Inline Form Checks -->
+                            <div class="form-checks-inline">
+                                <span class="form-pill {% if clip.metrics.form_checks.full_depth.status %}correct{% else %}incorrect{% endif %}">
+                                    {% if clip.metrics.form_checks.full_depth.status %}✓{% else %}✗{% endif %}
+                                    Full Depth
+                                </span>
+                                <span class="form-pill {% if clip.metrics.form_checks.full_lockout.status %}correct{% else %}incorrect{% endif %}">
+                                    {% if clip.metrics.form_checks.full_lockout.status %}✓{% else %}✗{% endif %}
+                                    Lockout
+                                </span>
+                                <span class="form-pill {% if clip.metrics.form_checks.complete_rep.status %}correct{% else %}incorrect{% endif %}">
+                                    {% if clip.metrics.form_checks.complete_rep.status %}✓{% else %}✗{% endif %}
+                                    Complete
+                                </span>
+                                <span class="form-pill {% if clip.metrics.form_checks.hip_alignment.status %}correct{% else %}incorrect{% endif %}">
+                                    {% if clip.metrics.form_checks.hip_alignment.status %}✓{% else %}✗{% endif %}
+                                    Hip Alignment
+                                </span>
+                                <span class="form-pill {% if clip.metrics.form_checks.body_straight.status %}correct{% else %}incorrect{% endif %}">
+                                    {% if clip.metrics.form_checks.body_straight.status %}✓{% else %}✗{% endif %}
+                                    Body Position
+                                </span>
+                                <span class="form-pill {% if clip.metrics.form_checks.head_position.status %}correct{% else %}incorrect{% endif %}">
+                                    {% if clip.metrics.form_checks.head_position.status %}✓{% else %}✗{% endif %}
+                                    Head Position
+                                </span>
+                            </div>
+                        </div>
+                        
+                        <button class="toggle-details" data-target="details-{{ clip.rep_number }}">
+                            <span class="toggle-text">Show Details</span>
+                            <svg class="toggle-icon" width="20" height="20" viewBox="0 0 20 20" fill="none">
+                                <path d="M5 7.5L10 12.5L15 7.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </button>
+                    </div>
+                    
+                    <!-- Detailed Metrics (Collapsed by default) -->
+                    <div class="rep-details" id="details-{{ clip.rep_number }}" style="display: none;">
+                        <div class="metrics-grid">
+                            <!-- Timing Column -->
+                            <div class="metric-column">
+                                <div class="column-header">
+                                    <span class="column-icon">⏱️</span>
+                                    <h4>Timing</h4>
+                                </div>
+                                <div class="metric-row">
+                                    <span>Down Time:</span>
+                                    <span>{{ clip.metrics.detailed.timing.down_time|floatformat:2 }}s</span>
+                                </div>
+                                <div class="metric-row">
+                                    <span>Up Time:</span>
+                                    <span>{{ clip.metrics.detailed.timing.up_time|floatformat:2 }}s</span>
+                                </div>
+                                <div class="metric-row">
+                                    <span>Bottom Pause:</span>
+                                    <span>{{ clip.metrics.detailed.timing.bottom_pause|floatformat:2 }}s</span>
+                                </div>
+                            </div>
+                            
+                            <!-- Range of Motion Column -->
+                            <div class="metric-column">
+                                <div class="column-header">
+                                    <span class="column-icon">📐</span>
+                                    <h4>Range of Motion</h4>
+                                </div>
+                                <div class="metric-row">
+                                    <span>Min Angle:</span>
+                                    <span>{{ clip.metrics.detailed.range_of_motion.min_elbow_angle|floatformat:1 }}°</span>
+                                </div>
+                                <div class="metric-row">
+                                    <span>Max Angle:</span>
+                                    <span>{{ clip.metrics.detailed.range_of_motion.max_elbow_angle|floatformat:1 }}°</span>
+                                </div>
+                                <div class="metric-row">
+                                    <span>Range:</span>
+                                    <span>{{ clip.metrics.detailed.range_of_motion.range_of_motion|floatformat:1 }}°</span>
+                                </div>
+                            </div>
+                            
+                            <!-- Body Position Column -->
+                            <div class="metric-column">
+                                <div class="column-header">
+                                    <span class="column-icon">🏋️</span>
+                                    <h4>Body Position</h4>
+                                </div>
+                                <div class="metric-row">
+                                    <span>Hip Deviation:</span>
+                                    <span>{{ clip.metrics.detailed.plank.hip_deviation_mean_abs|floatformat:3 }}</span>
+                                </div>
+                                <div class="metric-row">
+                                    <span>Body Angle:</span>
+                                    <span>{{ clip.metrics.detailed.plank.body_angle_bottom_deg|floatformat:1 }}°</span>
+                                </div>
+                                <div class="metric-row">
+                                    <span>Angle Range:</span>
+                                    <span>{{ clip.metrics.detailed.plank.body_angle_range_deg|floatformat:1 }}°</span>
+                                </div>
+                            </div>
+                            
+                            <!-- Head Position Column -->
+                            {% if clip.metrics.detailed.head %}
+                            <div class="metric-column">
+                                <div class="column-header">
+                                    <span class="column-icon">👤</span>
+                                    <h4>Head Position</h4>
+                                </div>
+                                <div class="metric-row">
+                                    <span>Head Angle:</span>
+                                    <span>{{ clip.metrics.detailed.head.torso_head_angle_bottom|floatformat:1 }}°</span>
+                                </div>
+                                <div class="metric-row">
+                                    <span>Angle Range:</span>
+                                    <span>{{ clip.metrics.detailed.head.torso_head_angle_range|floatformat:1 }}°</span>
+                                </div>
+                                <div class="metric-row">
+                                    <span>Min/Max:</span>
+                                    <span>{{ clip.metrics.detailed.head.torso_head_angle_min|floatformat:1 }}° / {{ clip.metrics.detailed.head.torso_head_angle_max|floatformat:1 }}°</span>
+                                </div>
+                            </div>
+                            {% else %}
+                            <div class="metric-column">
+                                <div class="column-header">
+                                    <span class="column-icon">👤</span>
+                                    <h4>Head Position</h4>
+                                </div>
+                                <div class="metric-row">
+                                    <span class="text-muted">Not available</span>
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
                     </div>
                 </div>
                 {% empty %}
-                <p style="text-align: center; color: var(--text-muted); grid-column: 1 / -1;">No repetition clips found.</p>
+                <div class="no-results">
+                    <p>No repetition clips found.</p>
+                </div>
                 {% endfor %}
             </div>
         </div>
     </div>
 </section>
+
+<!-- Video Modal -->
+<div class="video-modal" id="videoModal">
+    <div class="video-modal-overlay"></div>
+    <div class="video-modal-content">
+        <button class="video-modal-close">&times;</button>
+        <video id="modalVideo" controls>
+            <source src="" type="video/mp4">
+        </video>
+    </div>
+</div>
 {% endblock %}
 
 {% block extra_js %}
-<script src="{% static 'js/upload_video/results-simple.js' %}"></script>
+<script src="{% static 'js/upload_video/results-display.js' %}"></script>
 {% endblock %}

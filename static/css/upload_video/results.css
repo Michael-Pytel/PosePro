@@ -881,6 +881,317 @@ body {
     }
 }
 
+/* AI Section Label */
+.ai-section-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #a78bfa;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+}
+
+.ai-icon-small {
+    font-size: 0.9rem;
+}
+
+/* AI Predictions Inline (Collapsed Pills) */
+.ai-predictions-inline {
+    margin-top: 0.75rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid rgba(167, 139, 250, 0.2);
+}
+
+.ai-pills-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.ai-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.4rem 0.75rem;
+    background: rgba(167, 139, 250, 0.1);
+    border: 1.5px solid rgba(167, 139, 250, 0.3);
+    border-radius: 20px;
+    font-size: 0.8rem;
+    transition: all 0.2s ease;
+}
+
+.ai-pill:hover {
+    background: rgba(167, 139, 250, 0.15);
+    border-color: rgba(167, 139, 250, 0.5);
+    transform: translateY(-1px);
+}
+
+.ai-pill.correct {
+    background: rgba(16, 185, 129, 0.1);
+    border-color: rgba(16, 185, 129, 0.4);
+    color: #10b981;
+}
+
+.ai-pill.incorrect {
+    background: rgba(239, 68, 68, 0.1);
+    border-color: rgba(239, 68, 68, 0.4);
+    color: #ef4444;
+}
+
+.pill-icon {
+    font-size: 0.85rem;
+    font-weight: bold;
+}
+
+.pill-text {
+    color: #e2e8f0;
+}
+
+.pill-dots {
+    font-size: 0.5rem;
+    letter-spacing: 1px;
+    opacity: 0.7;
+}
+
+.pill-dots.conf-high {
+    color: #10b981;
+}
+
+.pill-dots.conf-medium {
+    color: #f59e0b;
+}
+
+.pill-dots.conf-low {
+    color: #ef4444;
+}
+
+/* AI Predictions Card (Expanded View) */
+.ai-predictions-card {
+    background: rgba(30, 30, 45, 0.6);
+    border: 1px solid rgba(167, 139, 250, 0.2);
+    border-radius: 12px;
+    padding: 1.25rem;
+    margin-top: 1rem;
+}
+
+.ai-card-header {
+    margin-bottom: 1rem;
+}
+
+.ai-title {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.ai-icon {
+    font-size: 1.2rem;
+}
+
+.ai-title h4 {
+    margin: 0;
+    font-size: 1rem;
+    color: #a78bfa;
+    font-weight: 600;
+}
+
+/* AI Predictions Grid */
+.ai-predictions-grid {
+    display: grid;
+    gap: 0.75rem;
+}
+
+.ai-prediction-item {
+    background: rgba(30, 30, 45, 0.8);
+    border: 1px solid rgba(100, 100, 120, 0.3);
+    border-radius: 8px;
+    padding: 0.85rem;
+    transition: all 0.2s ease;
+}
+
+.ai-prediction-item:hover {
+    border-color: rgba(167, 139, 250, 0.5);
+    transform: translateX(2px);
+}
+
+.ai-prediction-item.correct {
+    border-left: 3px solid #10b981;
+}
+
+.ai-prediction-item.incorrect {
+    border-left: 3px solid #ef4444;
+}
+
+.prediction-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.6rem;
+}
+
+.criterion-name {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #e2e8f0;
+}
+
+.status-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.status-badge.success {
+    background: rgba(16, 185, 129, 0.2);
+    color: #10b981;
+    border: 1px solid rgba(16, 185, 129, 0.4);
+}
+
+.status-badge.error {
+    background: rgba(239, 68, 68, 0.2);
+    color: #ef4444;
+    border: 1px solid rgba(239, 68, 68, 0.4);
+}
+
+.prediction-bottom {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.confidence-indicator {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.conf-label {
+    font-size: 0.75rem;
+    color: #94a3b8;
+}
+
+.conf-value {
+    padding: 0.2rem 0.6rem;
+    border-radius: 10px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.conf-value.conf-high {
+    background: rgba(16, 185, 129, 0.15);
+    color: #10b981;
+}
+
+.conf-value.conf-medium {
+    background: rgba(245, 158, 11, 0.15);
+    color: #f59e0b;
+}
+
+.conf-value.conf-low {
+    background: rgba(239, 68, 68, 0.15);
+    color: #ef4444;
+}
+
+.probability-bar {
+    height: 4px;
+    background: rgba(100, 100, 120, 0.3);
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+.prob-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #10b981 0%, #f59e0b 50%, #ef4444 100%);
+    border-radius: 2px;
+    transition: width 0.3s ease;
+}
+
+/* ML Overall Assessment Card */
+.ml-overall-card {
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+    border: 1.5px solid rgba(167, 139, 250, 0.3);
+    border-radius: 12px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+}
+
+.ml-overall-card .ml-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.75rem;
+}
+
+.ai-badge-small {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.3rem 0.75rem;
+    background: rgba(167, 139, 250, 0.2);
+    color: #a78bfa;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.confidence-badge {
+    padding: 0.3rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.confidence-high {
+    background: rgba(16, 185, 129, 0.2);
+    color: #10b981;
+    border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.confidence-medium {
+    background: rgba(245, 158, 11, 0.2);
+    color: #f59e0b;
+    border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.confidence-low {
+    background: rgba(239, 68, 68, 0.2);
+    color: #ef4444;
+    border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.ml-message {
+    font-size: 0.95rem;
+    margin: 0.5rem 0;
+    font-weight: 500;
+    color: #e2e8f0;
+}
+
+.ml-message.success {
+    color: #10b981;
+}
+
+.ml-message.warning {
+    color: #f59e0b;
+}
+
+.ml-criteria-count {
+    font-size: 0.85rem;
+    color: #94a3b8;
+}
+
+.all-passed {
+    color: #10b981;
+    font-weight: 600;
+}
+
 /* ===========================
    ANIMATIONS
    =========================== */

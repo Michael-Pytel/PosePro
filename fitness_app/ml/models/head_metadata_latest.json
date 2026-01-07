@@ -1,0 +1,73 @@
+{
+  "criterion": "head",
+  "timestamp": "20260107_162231",
+  "threshold": 0.7341196998513452,
+  "model_type": "LogisticRegression",
+  "uses_smote": true,
+  "metrics": {
+    "ROC-AUC": 0.7455152273675428,
+    "PR-AUC": 0.7201436682836962,
+    "F1-Score": 0.6904761904761905,
+    "MCC": 0.5792917582528619,
+    "Log Loss": 0.5741345740082568,
+    "Sensitivity": 0.6170212765957447,
+    "Specificity": 0.9215686274509803,
+    "Precision": 0.7837837837837838,
+    "Recall": 0.6170212765957447
+  },
+  "training_info": {
+    "train_athletes": 33,
+    "test_athletes": 1,
+    "train_ids": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      23,
+      24,
+      25,
+      26,
+      27,
+      28,
+      29,
+      30,
+      31,
+      32,
+      33,
+      34
+    ],
+    "test_ids": [
+      22
+    ]
+  },
+  "feature_names": [
+    "torso_head_angle_bottom",
+    "torso_head_angle_min",
+    "torso_head_angle_max",
+    "torso_head_angle_range",
+    "torso_head_angle_mean",
+    "head_forward_norm_bottom",
+    "head_forward_norm_min",
+    "head_forward_norm_max",
+    "head_forward_norm_range",
+    "head_forward_norm_mean"
+  ],
+  "python_version": "3.12"
+}

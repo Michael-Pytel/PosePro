@@ -5,7 +5,7 @@ from django.http import JsonResponse
 from django.shortcuts import render, redirect
 from django.conf import settings
 from .models import PushupVideosModel
-from .processors.uploading_processor import UploadingProcessor
+from fitness_app.uploading_processor import UploadingProcessor
 
 
 
@@ -18,11 +18,16 @@ def convert_numpy_types(obj):
     """
     Recursively convert numpy types to native Python types for JSON serialization
     """
-    if isinstance(obj, (np.integer, np.int64, np.int32, np.int16, np.int8)):
+    if obj is None:  # NEW - handle None explicitly
+        return None
+    elif isinstance(obj, (np.integer, np.int64, np.int32, np.int16, np.int8)):
         return int(obj)
     elif isinstance(obj, (np.floating, np.float64, np.float32, np.float16)):
+        # Handle NaN
+        if np.isnan(obj):
+            return None
         return float(obj)
-    elif isinstance(obj, (np.bool_, np.bool8)):  # ← Added this
+    elif isinstance(obj, (np.bool_, np.bool8, bool)):  # Include native bool
         return bool(obj)
     elif isinstance(obj, np.ndarray):
         return obj.tolist()
@@ -53,6 +58,13 @@ def upload_video(request):
             processor = UploadingProcessor()
             results = processor._process_video(video_path)
             
+            if results.get('repetitions'):
+                first_rep = results['repetitions'][0]
+                ml_checks = first_rep.get('ml_form_checks', {})
+                print(f"✓ ML predictions in results: {list(ml_checks.keys())}")
+                if ml_checks.get('range_of_motion'):
+                    print(f"  ROM prediction: {ml_checks['range_of_motion'].get('value')}")
+
             # Convert numpy types to native Python types
             results_clean = convert_numpy_types(results)
             

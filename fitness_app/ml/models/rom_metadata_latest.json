@@ -1,0 +1,73 @@
+{
+  "criterion": "rom",
+  "timestamp": "20260107_162246",
+  "threshold": 0.007331323942415668,
+  "model_type": "LogisticRegression",
+  "uses_smote": true,
+  "metrics": {
+    "ROC-AUC": 0.8017241379310345,
+    "PR-AUC": 0.728759664022206,
+    "F1-Score": 0.7050359712230215,
+    "MCC": 0.4856222250172106,
+    "Log Loss": 1.3166316456702547,
+    "Sensitivity": 0.8448275862068966,
+    "Specificity": 0.6521739130434783,
+    "Precision": 0.6049382716049383,
+    "Recall": 0.8448275862068966
+  },
+  "training_info": {
+    "train_athletes": 33,
+    "test_athletes": 1,
+    "train_ids": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      23,
+      24,
+      25,
+      26,
+      27,
+      28,
+      29,
+      30,
+      31,
+      32,
+      33,
+      34
+    ],
+    "test_ids": [
+      22
+    ]
+  },
+  "feature_names": [
+    "max_elbow_angle",
+    "min_elbow_angle",
+    "range_of_motion_angle",
+    "full_depth",
+    "full_lockout",
+    "is_complete_rep",
+    "down_time",
+    "up_time",
+    "rep_time",
+    "bottom_pause"
+  ],
+  "python_version": "3.12"
+}

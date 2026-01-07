@@ -78,6 +78,41 @@
                     </div>
                 </div>
             </div>
+
+            {% if overall_statistics.ml_summary %}
+            <div class="ai-assessment-summary">
+                <div class="ai-header">
+                    <h3>
+                        <span class="ai-badge">🤖 AI</span>
+                        AI-Powered Form Assessment
+                    </h3>
+                    <span class="success-rate">{{ overall_statistics.ml_summary.success_rate }} Success Rate</span>
+                </div>
+                
+                <div class="ai-quality-badges">
+                    <div class="ai-quality-badge">
+                        <span class="badge-label">Range of Motion</span>
+                        <span class="badge-value">{{ overall_statistics.ml_summary.range_of_motion }}</span>
+                    </div>
+                    <div class="ai-quality-badge">
+                        <span class="badge-label">Hip Alignment</span>
+                        <span class="badge-value">{{ overall_statistics.ml_summary.hips }}</span>
+                    </div>
+                    <div class="ai-quality-badge">
+                        <span class="badge-label">Head Position</span>
+                        <span class="badge-value">{{ overall_statistics.ml_summary.head_position }}</span>
+                    </div>
+                    <div class="ai-quality-badge highlight">
+                        <span class="badge-label">All Criteria Perfect</span>
+                        <span class="badge-value">{{ overall_statistics.ml_summary.all_correct }}</span>
+                    </div>
+                    <div class="ai-quality-badge">
+                        <span class="badge-label">High Confidence</span>
+                        <span class="badge-value">{{ overall_statistics.ml_summary.high_confidence }}</span>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
         </div>
 
         <!-- Individual Repetitions List View -->
@@ -121,35 +156,76 @@
                                     <span class="stat-icon">📐</span> {{ clip.metrics.summary.rom }}
                                 </span>
                             </div>
-                            
-                            <!-- Inline Form Checks -->
-                            <div class="form-checks-inline">
-                                <span class="form-pill {% if clip.metrics.form_checks.full_depth.status %}correct{% else %}incorrect{% endif %}">
-                                    {% if clip.metrics.form_checks.full_depth.status %}✓{% else %}✗{% endif %}
-                                    Full Depth
-                                </span>
-                                <span class="form-pill {% if clip.metrics.form_checks.full_lockout.status %}correct{% else %}incorrect{% endif %}">
-                                    {% if clip.metrics.form_checks.full_lockout.status %}✓{% else %}✗{% endif %}
-                                    Lockout
-                                </span>
-                                <span class="form-pill {% if clip.metrics.form_checks.complete_rep.status %}correct{% else %}incorrect{% endif %}">
-                                    {% if clip.metrics.form_checks.complete_rep.status %}✓{% else %}✗{% endif %}
-                                    Complete
-                                </span>
-                                <span class="form-pill {% if clip.metrics.form_checks.hip_alignment.status %}correct{% else %}incorrect{% endif %}">
-                                    {% if clip.metrics.form_checks.hip_alignment.status %}✓{% else %}✗{% endif %}
-                                    Hip Alignment
-                                </span>
-                                <span class="form-pill {% if clip.metrics.form_checks.body_straight.status %}correct{% else %}incorrect{% endif %}">
-                                    {% if clip.metrics.form_checks.body_straight.status %}✓{% else %}✗{% endif %}
-                                    Body Position
-                                </span>
-                                <span class="form-pill {% if clip.metrics.form_checks.head_position.status %}correct{% else %}incorrect{% endif %}">
-                                    {% if clip.metrics.form_checks.head_position.status %}✓{% else %}✗{% endif %}
-                                    Head Position
-                                </span>
+                            {% if clip.metrics.ml_overall %}
+                            <div class="ml-overall-card">
+                                <div class="ml-header">
+                                    <span class="ai-badge-small">🤖 AI Assessment</span>
+                                    <span class="confidence-badge confidence-{{ clip.metrics.ml_overall.confidence }}">
+                                        {{ clip.metrics.ml_overall.confidence|title }} Confidence
+                                    </span>
+                                </div>
+                                <p class="ml-message {% if clip.metrics.ml_overall.overall_correct %}success{% else %}warning{% endif %}">
+                                    {{ clip.metrics.ml_overall.message }}
+                                </p>
+                                <div class="ml-criteria-count">
+                                    <span class="{% if clip.metrics.ml_overall.criteria_passed == clip.metrics.ml_overall.criteria_total %}all-passed{% endif %}">
+                                        {{ clip.metrics.ml_overall.criteria_passed }}/{{ clip.metrics.ml_overall.criteria_total }} criteria passed
+                                    </span>
+                                </div>
                             </div>
-                        </div>
+                            {% endif %}
+                            <!-- Inline Form Checks -->
+                            <!-- Form Checks: Rule-Based -->
+                            <div class="form-checks-section">
+                                <h5 class="checks-title">Rule-Based Checks</h5>
+                                <div class="form-checks-inline">
+                                    <span class="form-pill {% if clip.metrics.form_checks.full_depth.status %}correct{% else %}incorrect{% endif %}">
+                                        {% if clip.metrics.form_checks.full_depth.status %}✓{% else %}✗{% endif %}
+                                        Full Depth
+                                    </span>
+                                    <span class="form-pill {% if clip.metrics.form_checks.full_lockout.status %}correct{% else %}incorrect{% endif %}">
+                                        {% if clip.metrics.form_checks.full_lockout.status %}✓{% else %}✗{% endif %}
+                                        Lockout
+                                    </span>
+                                    <span class="form-pill {% if clip.metrics.form_checks.hip_alignment.status %}correct{% else %}incorrect{% endif %}">
+                                        {% if clip.metrics.form_checks.hip_alignment.status %}✓{% else %}✗{% endif %}
+                                        Hip Alignment
+                                    </span>
+                                    <span class="form-pill {% if clip.metrics.form_checks.body_straight.status %}correct{% else %}incorrect{% endif %}">
+                                        {% if clip.metrics.form_checks.body_straight.status %}✓{% else %}✗{% endif %}
+                                        Body Position
+                                    </span>
+                                    <span class="form-pill {% if clip.metrics.form_checks.head_position.status %}correct{% else %}incorrect{% endif %}">
+                                        {% if clip.metrics.form_checks.head_position.status %}✓{% else %}✗{% endif %}
+                                        Head Position
+                                    </span>
+                                </div>
+                            </div>
+                            
+                            <!-- AI Predictions Pills (collapsed view) -->
+                            {% if clip.metrics.ml_form_checks %}
+                            <div class="ai-predictions-inline">
+                                <div class="ai-section-label">
+                                    <span class="ai-icon-small">🤖</span>
+                                    <span>AI Predictions</span>
+                                </div>
+                                <div class="ai-pills-row">
+                                    {% for criterion, pred in clip.metrics.ml_form_checks.items %}
+                                    {% if pred.success != False %}
+                                    <span class="ai-pill {% if pred.status %}correct{% else %}incorrect{% endif %}" 
+                                        title="{{ pred.confidence }} confidence">
+                                        <span class="pill-icon">{% if pred.status %}✓{% else %}✗{% endif %}</span>
+                                        <span class="pill-text">{{ pred.label|slice:":-5"|truncatechars:12 }}</span>
+                                        <span class="pill-dots conf-{{ pred.confidence|lower }}">
+                                            {% if pred.confidence == 'High' %}●●●{% elif pred.confidence == 'Medium' %}●●○{% else %}●○○{% endif %}
+                                        </span>
+                                    </span>
+                                    {% endif %}
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            {% endif %}
+                            
                         
                         <button class="toggle-details" data-target="details-{{ clip.rep_number }}">
                             <span class="toggle-text">Show Details</span>
@@ -254,6 +330,36 @@
                             </div>
                             {% endif %}
                         </div>
+                        <!-- NEW: ML Predictions Column -->
+                        {% if clip.metrics.ml_form_checks %}
+                        <div class="metric-column ml-column">
+                            <div class="column-header ai-header">
+                                <span class="column-icon">🤖</span>
+                                <h4>AI Predictions</h4>
+                            </div>
+                            
+                            {% for criterion, pred in clip.metrics.ml_form_checks.items %}
+                            <div class="metric-row ml-prediction-row">
+                                <div class="prediction-header">
+                                    <span class="prediction-label">{{ pred.label|slice:":-5" }}</span>
+                                    <span class="prediction-status {% if pred.status %}correct{% else %}incorrect{% endif %}">
+                                        {{ pred.value }}
+                                    </span>
+                                </div>
+                                <div class="prediction-details">
+                                    <span class="confidence-badge-small confidence-{{ pred.confidence|lower }}">
+                                        {{ pred.confidence }} confidence
+                                    </span>
+                                    {% if pred.probability %}
+                                    <span class="probability-text">
+                                        {{ pred.probability|floatformat:1 }}% incorrect
+                                    </span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
                     </div>
                 </div>
                 {% empty %}

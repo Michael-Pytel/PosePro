@@ -236,19 +236,19 @@ def compute_pushup_signals(landmarks_data, fps):
             hip_center_y - shoulder_center_y,
             hip_center_x_ - shoulder_center_x_
         ))
-        torso_angles.append(abs(torso_angle))
+        torso_angles.append(np.rad2deg(np.unwrap(np.deg2rad(torso_angle))))
 
         torso_angle_left = np.degrees(np.arctan2(
             lm[23]['y'] - lm[11]['y'],
             lm[23]['x'] - lm[11]['x']
         ))
-        torso_angles_left.append(abs(torso_angle_left))
+        torso_angles_left.append(np.rad2deg(np.unwrap(np.deg2rad(torso_angle_left))))
 
         torso_angle_right = np.degrees(np.arctan2(
             lm[24]['y'] - lm[12]['y'],
             lm[24]['x'] - lm[12]['x']
         ))
-        torso_angles_right.append(abs(torso_angle_right))
+        torso_angles_right.append(np.rad2deg(np.unwrap(np.deg2rad(torso_angle_right))))
 
         # BODY ANGLE (ANKLE - HIP - SHOULDER)
         shoulder_avg = {'x': (lm[11]['x'] + lm[12]['x']) / 2, 'y': (lm[11]['y'] + lm[12]['y']) / 2}

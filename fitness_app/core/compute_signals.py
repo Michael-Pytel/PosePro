@@ -3,22 +3,22 @@ from typing import Dict, List
 from fitness_app.utils.interpolation import interpolate_nans
 from fitness_app.utils.visibility_utils import compute_visibility_scores
 
-# debug = True
 
 def _append_nan(*lists):
     for lst in lists:
         lst.append(np.nan)
 
+
 def compute_pushup_signals(landmarks_data, fps):
     """Compute motion signals for push-ups"""
-    
+
     # To consider wheter use it or not
     # camera_orientation = detect_camera_orientation(landmarks_data)
 
     # Computing signals visibility score
     key_points = [7, 8, 11, 12, 13, 14, 15, 16, 23, 24, 27, 28]  # Shoulder, elbow, wrist, hip, ankle
     visibility_scores = compute_visibility_scores(landmarks_data, key_points)
-    # print("Visibility scores:", visibility_scores)
+    print("Visibility scores:", visibility_scores)
     signals = {}
 
     # BASIC AVERAGE Y-POSITIONS
@@ -88,9 +88,11 @@ def compute_pushup_signals(landmarks_data, fps):
     body_angles_right = []
     plank_angles = []
 
-    #HEAD ANGLES
+    # HEAD ANGLES
     left_torso_head_angle = []
     right_torso_head_angle = []
+    left_head_tilt_angle = []
+    right_head_tilt_angle = []
 
     # SHOULDER HIP DISTANCE AND OTHER 3D DISTANCES
     shoulder_hip_distances = []
@@ -125,7 +127,7 @@ def compute_pushup_signals(landmarks_data, fps):
                         torso_center_x, nose_x, left_shoulder_x, right_shoulder_x, left_elbow_x,
                         right_elbow_x, left_wrist_x, right_wrist_x, left_hip_x, right_hip_x,
                         left_ankle_x, right_ankle_x, left_ear_x, right_ear_x
-            )
+                        )
 
             # Z
             _append_nan(avg_hip_z, avg_shoulder_z, torso_center_z)
@@ -137,7 +139,8 @@ def compute_pushup_signals(landmarks_data, fps):
                 left_wrist_angles, right_wrist_angles,
                 torso_angles, torso_angles_left, torso_angles_right,
                 body_angles, body_angles_left, body_angles_right,
-                plank_angles, left_torso_head_angle, right_torso_head_angle
+                plank_angles, left_torso_head_angle, right_torso_head_angle,
+                left_head_tilt_angle, right_head_tilt_angle
             )
 
             # DISTANCES
@@ -254,22 +257,26 @@ def compute_pushup_signals(landmarks_data, fps):
         body_angles.append(calculate_angle(ankle_avg, hip_avg, shoulder_avg))
 
         # BODY ANGLE LEFT
-        shoulder_left = {'x': lm[11]['x'], 'y': lm[11]['y']}
-        hip_left = {'x': lm[23]['x'], 'y': lm[23]['y']}
-        ankle_left = {'x': lm[27]['x'], 'y': lm[27]['y']}
+        shoulder_left = {'x': lm[11]['x'], 'y': lm[11]['y'], 'z': lm[11]['z']}
+        hip_left = {'x': lm[23]['x'], 'y': lm[23]['y'], 'z': lm[23]['z']}
+        ankle_left = {'x': lm[27]['x'], 'y': lm[27]['y'], 'z': lm[27]['z']}
         body_angles_left.append(calculate_angle(shoulder_left, hip_left, ankle_left))
 
         # BODY ANGLE RIGHT
-        shoulder_right = {'x': lm[12]['x'], 'y': lm[12]['y']}
-        hip_right = {'x': lm[24]['x'], 'y': lm[24]['y']}
-        ankle_right = {'x': lm[28]['x'], 'y': lm[28]['y']}
+        shoulder_right = {'x': lm[12]['x'], 'y': lm[12]['y'], 'z': lm[12]['z']}
+        hip_right = {'x': lm[24]['x'], 'y': lm[24]['y'], 'z': lm[24]['z']}
+        ankle_right = {'x': lm[28]['x'], 'y': lm[28]['y'], 'z': lm[28]['z']}
         body_angles_right.append(calculate_angle(ankle_right, hip_right, shoulder_right))
 
         # HEAD ANGLES
-        ear_left = {'x': lm[7]['x'], 'y': lm[7]['y']}
-        ear_right = {'x': lm[8]['x'], 'y': lm[8]['y']}
-        left_torso_head_angle.append(calculate_angle(ear_left, shoulder_left, ankle_left))
-        right_torso_head_angle.append(calculate_angle(ear_right, shoulder_right, ankle_right))
+        ear_left = {'x': lm[7]['x'], 'y': lm[7]['y'], 'z': lm[7]['z']}
+        ear_right = {'x': lm[8]['x'], 'y': lm[8]['y'], 'z': lm[8]['z']}
+        left_torso_head_angle.append(calculate_angle(ear_left, shoulder_left, ankle_left, ("x", "y")))
+        right_torso_head_angle.append(calculate_angle(ear_right, shoulder_right, ankle_right, ("x", "y")))
+
+        nose = {'x': lm[0]['x'], 'y': lm[0]['y'], 'z': lm[0]['z']}
+        left_head_tilt_angle.append(calculate_angle(nose, ear_left, shoulder_left))
+        right_head_tilt_angle.append(calculate_angle(nose, ear_right, shoulder_right))
 
         # PLANK ANGLE (NOSE - HIP - ANKLE)
         nose_pt = {'x': lm[0]['x'], 'y': lm[0]['y']}
@@ -377,6 +384,8 @@ def compute_pushup_signals(landmarks_data, fps):
     signals['plank_angle'] = interpolate_nans(np.array(plank_angles))
     signals['left_torso_head_angle'] = interpolate_nans(np.array(left_torso_head_angle))
     signals['right_torso_head_angle'] = interpolate_nans(np.array(right_torso_head_angle))
+    signals['left_head_tilt_angle'] = interpolate_nans(np.array(left_head_tilt_angle))
+    signals['right_head_tilt_angle'] = interpolate_nans(np.array(right_head_tilt_angle))
 
     # 3D DISTANCES
     signals['shoulder_hip_distance'] = interpolate_nans(np.array(shoulder_hip_distances))
@@ -408,16 +417,20 @@ def compute_pushup_signals(landmarks_data, fps):
     return signals, visibility_scores
 
 
-def calculate_angle(p1: Dict, p2: Dict, p3: Dict) -> float:
+def points_to_array(point, dims=('x', 'y', 'z')):
+    return np.array([point[dim] for dim in dims if dim in point], dtype=float)
+
+
+def calculate_angle(p1: Dict, p2: Dict, p3: Dict, dims=('x', 'y', 'z')) -> float:
     """Calculate angle"""
-    a = np.array([p1['x'], p1['y']])
-    b = np.array([p2['x'], p2['y']])
-    c = np.array([p3['x'], p3['y']])
-    
+    a = points_to_array(p1, dims)
+    b = points_to_array(p2, dims)
+    c = points_to_array(p3, dims)
+
     ba = a - b
     bc = c - b
-    
+
     cosine = np.dot(ba, bc) / (np.linalg.norm(ba) * np.linalg.norm(bc) + 1e-8)
     angle = np.arccos(np.clip(cosine, -1.0, 1.0))
-    
+
     return np.degrees(angle)

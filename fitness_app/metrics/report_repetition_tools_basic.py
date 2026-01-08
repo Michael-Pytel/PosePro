@@ -15,6 +15,13 @@ class TimingMetrics:
 class RangeOfMotionMetrics:
     max_elbow_angle: float
     min_elbow_angle: float
+    mean_elbow_angle: float
+    elbow_angle_q_10: float
+    elbow_angle_q_25: float
+    elbow_angle_q_50: float
+    elbow_angle_q_75: float
+    elbow_angle_q_90: float
+    elbow_angle_std: float
     range_of_motion: float
     full_depth: bool
     full_lockout: bool
@@ -42,35 +49,21 @@ def compute_timing_metrics(elbow_angle_signal, start_frame, end_frame, bottom_fr
 
     elbow_segment = elbow_angle_signal[start_frame : end_frame + 1]
     min_elbow_angle, min_elbow_angle_frame = np.nanmin(elbow_segment), np.nanargmin(elbow_segment)
-
-    max_elbow_angle_first_half = np.nanmax(elbow_angle_signal[start_frame : bottom_frame + 1])
-    max_elbow_angle_first_half_frame = np.nanargmax(elbow_angle_signal[start_frame : bottom_frame + 1])
-
-    max_elbow_angle_second_half = np.nanmax(elbow_angle_signal[bottom_frame : end_frame + 1])
-    max_elbow_angle_second_half_frame = np.nanargmax(elbow_angle_signal[bottom_frame : end_frame + 1])
-
     angle_threshold = 5
 
     angle_mask_min = elbow_segment <= (min_elbow_angle + angle_threshold)
-    angle_mask_max = elbow_segment >= (np.nanmax([max_elbow_angle_first_half, max_elbow_angle_second_half]) - angle_threshold)
     block_min = continous_block_by_mask(angle_mask_min, min_elbow_angle_frame)
-
-    block_max_first = continous_block_by_mask(angle_mask_max, max_elbow_angle_first_half_frame)
-    block_max_second = continous_block_by_mask(angle_mask_max, max_elbow_angle_second_half_frame)
 
     if block_min == (min_elbow_angle_frame, min_elbow_angle_frame):
         bottom_pause_s = 0.0
+        pause_start_frame = start_frame + min_elbow_angle_frame
+        pause_end_frame = start_frame + min_elbow_angle_frame
     else:
         (pause_start_frame_relative, pause_end_frame_relative) = block_min
         bottom_pause_s = (pause_end_frame_relative - pause_start_frame_relative) / fps
 
         pause_start_frame = start_frame + pause_start_frame_relative
         pause_end_frame = start_frame + pause_end_frame_relative
-
-    if block_max_first == (max_elbow_angle_first_half_frame, max_elbow_angle_first_half_frame):
-        up_pause_first_s = 0.0
-    else :
-        (up_pause_first_start_frame_relative, up_pause_second) = block_max_first
 
     return TimingMetrics(down_time_s = float(down_time_s),
                          up_time_s = float(up_time_s),
@@ -84,6 +77,14 @@ def compute_rom_metrics(elbow_angle_signal, start_frame, end_frame, bottom_frame
     maximum_elbow_angle = np.nanmax(elbow_segment)
     minimum_elbow_angle = np.nanmin(elbow_segment)
 
+    mean_elbow_angle = np.nanmean(elbow_segment)
+    elbow_angle_q_10 = np.nanpercentile(elbow_segment, 10)
+    elbow_angle_q_25 = np.nanpercentile(elbow_segment, 25)
+    elbow_angle_q_50 = np.nanpercentile(elbow_segment, 50)
+    elbow_angle_q_75 = np.nanpercentile(elbow_segment, 75)
+    elbow_angle_q_90 = np.nanpercentile(elbow_segment, 90)
+    elbow_angle_std = np.nanstd(elbow_segment)
+
     range_of_motion = float(maximum_elbow_angle - minimum_elbow_angle)
     full_depth = minimum_elbow_angle <= 95
     full_lockout = maximum_elbow_angle >= 160
@@ -92,15 +93,17 @@ def compute_rom_metrics(elbow_angle_signal, start_frame, end_frame, bottom_frame
 
     return RangeOfMotionMetrics(max_elbow_angle = maximum_elbow_angle,
                                 min_elbow_angle= minimum_elbow_angle,
+                                mean_elbow_angle=mean_elbow_angle,
+                                elbow_angle_q_10 = elbow_angle_q_10,
+                                elbow_angle_q_25 = elbow_angle_q_25,
+                                elbow_angle_q_50 = elbow_angle_q_50,
+                                elbow_angle_q_75 = elbow_angle_q_75,
+                                elbow_angle_q_90 = elbow_angle_q_90,
+                                elbow_angle_std= elbow_angle_std,
                                 range_of_motion = range_of_motion,
                                 full_depth = full_depth,
                                 full_lockout = full_lockout,
                                 is_rep_full = is_rep_full)
-
-def test(signal, visibility_scores, repetition, fps):
-    which_signal = choose_elbow_visibility(visibility_scores)
-    print(compute_timing_metrics(signal[which_signal], repetition["start_frame"], repetition["end_frame"], repetition["bottom_frame"], fps))
-    print(compute_rom_metrics(signal[which_signal], repetition["start_frame"], repetition["end_frame"], repetition["bottom_frame"], fps))
 
 def get_timing(signal, visibility_scores, repetition, fps) -> Dict[str, Any]:
 
@@ -139,6 +142,13 @@ def get_rom(signal, visibility_scores, repetition, fps) -> Dict[str, Any]:
     return {
         'max_elbow_angle': rom.max_elbow_angle,
         'min_elbow_angle': rom.min_elbow_angle,
+        'mean_elbow_angle': rom.mean_elbow_angle,
+        'elbow_angle_q_10': rom.elbow_angle_q_10,
+        'elbow_angle_q_25': rom.elbow_angle_q_25,
+        'elbow_angle_q_50': rom.elbow_angle_q_50,
+        'elbow_angle_q_75': rom.elbow_angle_q_75,
+        'elbow_angle_q_90': rom.elbow_angle_q_90,
+        'elbow_angle_std': rom.elbow_angle_std,
         'range_of_motion': rom.range_of_motion,
         'full_depth': rom.full_depth,
         'full_lockout': rom.full_lockout,

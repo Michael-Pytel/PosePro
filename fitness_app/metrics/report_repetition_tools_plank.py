@@ -2,22 +2,42 @@ import numpy as np
 from dataclasses import dataclass
 from typing import List, Dict, Any
 
+from numpy.lib.nanfunctions import nanstd
+
 @dataclass(frozen=True)
 class PlankMetrics:
     hip_deviation_bottom: float
     hip_deviation_max_sag: float
     hip_deviation_max_pike: float
     hip_deviation_mean_abs: float
+    hip_deviation_std: float
+    hip_deviation_q_10: float
+    hip_deviation_q_25: float
+    hip_deviation_q_50: float
+    hip_deviation_q_75: float
+    hip_deviation_q_90: float
     torso_angle_bottom_deg: float
     torso_angle_max_deg: float
     torso_angle_min_deg: float
     torso_angle_mean_deg: float
     torso_angle_range_deg: float
+    torso_angle_q_10_deg: float
+    torso_angle_q_25_deg: float
+    torso_angle_q_50_deg: float
+    torso_angle_q_75_deg: float
+    torso_angle_q_90_deg: float
+    torso_angle_std: float
     body_angle_bottom_deg: float
     body_angle_max_deg: float
     body_angle_min_deg: float
     body_angle_mean_deg: float
     body_angle_range_deg: float
+    body_angle_q_10_deg: float
+    body_angle_q_25_deg: float
+    body_angle_q_50_deg: float
+    body_angle_q_75_deg: float
+    body_angle_q_90_deg: float
+    body_angle_std: float
     body_angle: List[float]
 
 def choose_side_visibility(visibility_scores):
@@ -46,7 +66,7 @@ def distance_of_hip_to_shoulder_ankle_line(shoulder_x, shoulder_y, hip_x, hip_y,
     sign = np.sign(hip_y - y_line)
     return d_perpendicular * sign
 
-def compute_plank_metrics(signal_args, start_frame, end_frame, bottom_frame, fps):
+def compute_plank_metrics(signal_args, start_frame, end_frame, bottom_frame,fps):
 
     (shoulder_x, shoulder_y, hip_x, hip_y, ankle_x,
         ankle_y, torso_angle, body_angle) = signal_args
@@ -72,108 +92,72 @@ def compute_plank_metrics(signal_args, start_frame, end_frame, bottom_frame, fps
     hip_deviation_max_sag = float(np.nanmax(hip_deviation))
     hip_deviation_max_pike = float(np.nanmin(hip_deviation))
     hip_deviation_mean_abs = float(np.nanmean(np.abs(hip_deviation)))
+    hip_deviation_std = float(nanstd(hip_deviation))
+    hip_deviation_q_10 = float(np.nanpercentile(hip_deviation, 10))
+    hip_deviation_q_25 = float(np.nanpercentile(hip_deviation, 25))
+    hip_deciation_q_50 = float(np.nanpercentile(hip_deviation, 50))
+    hip_deviation_q_75 = float(np.nanpercentile(hip_deviation, 75))
+    hip_deviation_q_90 = float(np.nanpercentile(hip_deviation, 90))
 
-    torso_angle_bottom_deg = float(torso_angle[relative_bottom])
+    torso_angle_bottom_deg = float(torso_angle_segment[relative_bottom])
     torso_angle_max_deg = float(np.nanmax(torso_angle_segment))
     torso_angle_min_deg = float(np.nanmin(torso_angle_segment))
     torso_angle_mean_deg = float(np.nanmean(torso_angle_segment))
     torso_angle_range_deg = float(torso_angle_max_deg - torso_angle_min_deg)
+    torso_angle_q_10_deg = float(np.nanpercentile(torso_angle_segment, 10))
+    torso_angle_q_25_deg = float(np.nanpercentile(torso_angle_segment, 25))
+    torso_angle_q_50_deg = float(np.nanpercentile(torso_angle_segment, 50))
+    torso_angle_q_75_deg = float(np.nanpercentile(torso_angle_segment, 75))
+    torso_angle_q_90_deg = float(np.nanpercentile(torso_angle_segment, 90))
+    torso_angle_std = np.nanstd(torso_angle_segment)
 
-    body_angle_bottom_deg = float(body_angle[relative_bottom])
+    body_angle_bottom_deg = float(body_angle_segment[relative_bottom])
     body_angle_max_deg = float(np.nanmax(body_angle_segment))
     body_angle_min_deg = float(np.nanmin(body_angle_segment))
     body_angle_mean_deg = float(np.nanmean(body_angle_segment))
     body_angle_range_deg = float(body_angle_max_deg - body_angle_min_deg)
+    body_angle_q_10_deg = float(np.nanpercentile(body_angle_segment, 10))
+    body_angle_q_25_deg = float(np.nanpercentile(body_angle_segment, 25))
+    body_angle_q_50_deg = float(np.nanpercentile(body_angle_segment, 50))
+    body_angle_q_75_deg = float(np.nanpercentile(body_angle_segment, 75))
+    body_angle_q_90_deg = float(np.nanpercentile(body_angle_segment, 90))
+    body_angle_std = np.nanstd(body_angle_segment)
 
     return PlankMetrics(
         hip_deviation_bottom = hip_deviation_bottom,
         hip_deviation_max_sag = hip_deviation_max_sag,
         hip_deviation_max_pike = hip_deviation_max_pike,
         hip_deviation_mean_abs = hip_deviation_mean_abs,
+        hip_deviation_std = hip_deviation_std,
+        hip_deviation_q_10 = hip_deviation_q_10,
+        hip_deviation_q_25 = hip_deviation_q_25,
+        hip_deviation_q_50 = hip_deciation_q_50,
+        hip_deviation_q_75 = hip_deviation_q_75,
+        hip_deviation_q_90 = hip_deviation_q_90,
         torso_angle_bottom_deg = torso_angle_bottom_deg,
         torso_angle_max_deg = torso_angle_max_deg,
         torso_angle_min_deg = torso_angle_min_deg,
         torso_angle_mean_deg = torso_angle_mean_deg,
         torso_angle_range_deg = torso_angle_range_deg,
+        torso_angle_q_10_deg = torso_angle_q_10_deg,
+        torso_angle_q_25_deg = torso_angle_q_25_deg,
+        torso_angle_q_50_deg = torso_angle_q_50_deg,
+        torso_angle_q_75_deg = torso_angle_q_75_deg,
+        torso_angle_q_90_deg = torso_angle_q_90_deg,
+        torso_angle_std=torso_angle_std,
         body_angle_bottom_deg = body_angle_bottom_deg,
         body_angle_max_deg = body_angle_max_deg,
         body_angle_min_deg = body_angle_min_deg,
         body_angle_mean_deg = body_angle_mean_deg,
         body_angle_range_deg = body_angle_range_deg,
+        body_angle_q_10_deg = body_angle_q_10_deg,
+        body_angle_q_25_deg = body_angle_q_25_deg,
+        body_angle_q_50_deg = body_angle_q_50_deg,
+        body_angle_q_75_deg = body_angle_q_75_deg,
+        body_angle_q_90_deg = body_angle_q_90_deg,
+        body_angle_std=body_angle_std,
         body_angle= body_angle_segment,
     )
-
-def velocity_threshold(velocity):
-    median = np.nanmedian(velocity)
-    mad = np.median(np.abs(velocity - median))
-    return float(max(1e-6, 2.5 * mad))
-
-def find_start_of_motion(signal, start_frame, end_frame, fps, direction):
-    segment = signal[start_frame:end_frame + 1].copy()
-
-    velocity_segment = np.diff(segment) * fps
-    vel_threshold = velocity_threshold(velocity_segment)
-
-    if direction == "up":
-        mask = (velocity_segment <= -vel_threshold)
-    else:
-        mask = (velocity_segment >= vel_threshold)
-
-    consecutive_frames = 3
-    for i in range(mask.size):
-        if mask[i]:
-            consecutive_frames -= 1
-            if consecutive_frames == 0:
-                return start_frame + (i + 1)
-        else:
-            consecutive_frames = 3
-    return False
-
-def normalized_cross_correlation_between_signals(signal_one, signal_two, max_lag_frames):
-    n = signal_one.size
-    signal_one_norm = signal_one - np.nanmean(signal_one)
-    signal_two_norm = signal_two - np.nanmean(signal_two)
-
-    # best_lag, best_corr =
-
-
-def compute_worming_phase(shoulder_y, hip_y, start_frame, end_frame, fps, direction, is_position):
-    shoulder_start_of_motion = find_start_of_motion(shoulder_y, start_frame, end_frame, fps, direction)
-    hip_start_of_motion = find_start_of_motion(hip_y, start_frame, end_frame, fps, direction)
-
-    if not shoulder_start_of_motion or not hip_start_of_motion:
-        start_lag_frames = None
-        start_lag_s = None
-    else:
-        start_lag_frames = int(hip_start_of_motion - shoulder_start_of_motion)
-        start_lag_s = float(start_lag_frames / fps)
-
-    segment_shoulder = shoulder_y[start_frame: end_frame + 1].copy()
-    segment_hip = hip_y[start_frame: end_frame + 1].copy()
-
-    if not is_position:
-        segment_shoulder = np.diff(segment_shoulder) * fps
-        segment_hip = np.diff(segment_hip) * fps
-
-    max_lag_frames = int(round(fps / 2))
-
-
-
-def test(signal, visibility_scores, repetition, fps):
-    side = choose_side_visibility(visibility_scores)
-    print(side)
-    signal_args = ((signal['left_shoulder_x'], signal['left_shoulder_y'],
-                   signal['left_hip_x'], signal['left_hip_y'],
-                   signal['left_ankle_x'], signal['left_ankle_y'],
-                   signal['torso_left_angle'], signal['body_left_angle']) if side == "left" else
-                   (signal['right_shoulder_x'], signal['right_shoulder_y'],
-                    signal['right_hip_x'], signal['right_hip_y'],
-                    signal['right_ankle_x'], signal['right_ankle_y'],
-                    signal['torso_right_angle'], signal['body_right_angle'])
-                   )
-    print(compute_plank_metrics(signal_args, repetition['start_frame'], repetition['end_frame'],
-                                repetition['bottom_frame'], fps))
-    
 def get_plank(signal, visibility_scores, repetition, fps) -> Dict[str, Any]:
     side = choose_side_visibility(visibility_scores)
     signal_args = ((signal['left_shoulder_x'], signal['left_shoulder_y'],
@@ -193,15 +177,33 @@ def get_plank(signal, visibility_scores, repetition, fps) -> Dict[str, Any]:
         'hip_deviation_max_sag': plank.hip_deviation_max_sag,
         'hip_deviation_max_pike': plank.hip_deviation_max_pike,
         'hip_deviation_mean_abs': plank.hip_deviation_mean_abs,
+        'hip_deviation_std': plank.hip_deviation_std,
+        'hip_deviation_q_10': plank.hip_deviation_q_10,
+        'hip_deviation_q_25': plank.hip_deviation_q_25,
+        'hip_deviation_q_50': plank.hip_deviation_q_50,
+        'hip_deviation_q_75': plank.hip_deviation_q_75,
+        'hip_deviation_q_90': plank.hip_deviation_q_90,
         'torso_angle_bottom_deg': plank.torso_angle_bottom_deg,
         'torso_angle_max_deg': plank.torso_angle_max_deg,
         'torso_angle_min_deg': plank.torso_angle_min_deg,
         'torso_angle_mean_deg': plank.torso_angle_mean_deg,
         'torso_angle_range_deg': plank.torso_angle_range_deg,
+        'torso_angle_q_10_deg': plank.torso_angle_q_10_deg,
+        'torso_angle_q_25_deg': plank.torso_angle_q_25_deg,
+        'torso_angle_q_50_deg': plank.torso_angle_q_50_deg,
+        'torso_angle_q_75_deg': plank.torso_angle_q_75_deg,
+        'torso_angle_q_90_deg': plank.torso_angle_q_90_deg,
+        'torso_angle_std': plank.torso_angle_std,
         'body_angle_bottom_deg': plank.body_angle_bottom_deg,
         'body_angle_max_deg': plank.body_angle_max_deg,
         'body_angle_min_deg': plank.body_angle_min_deg,
         'body_angle_mean_deg': plank.body_angle_mean_deg,
         'body_angle_range_deg': plank.body_angle_range_deg,
+        'body_angle_q_10_deg': plank.body_angle_q_10_deg,
+        'body_angle_q_25_deg': plank.body_angle_q_25_deg,
+        'body_angle_q_50_deg': plank.body_angle_q_50_deg,
+        'body_angle_q_75_deg': plank.body_angle_q_75_deg,
+        'body_angle_q_90_deg': plank.body_angle_q_90_deg,
+        'body_angle_std': plank.body_angle_std,
         'body_angle': plank.body_angle.tolist(),
     }

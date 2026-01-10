@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Analysis Results - PosePro Coach{% endblock %}
+{% block title %}AI Analysis Results - PosePro Coach{% endblock %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/upload_video/results.css' %}">
@@ -10,127 +10,70 @@
 {% block content %}
 <section class="results-section">
     <div class="container-wide">
-        <!-- Header with Back Button -->
         <div class="results-header">
             <a href="/demo/upload/" class="back-button">
                 <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
                     <path d="M16 10H4M4 10L10 16M4 10L10 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                 </svg>
-                <span>Upload New Video</span>
+                <span>Analyze New Video</span>
             </a>
             
             <div class="results-title-section">
                 <div class="results-badge">
                     <span class="badge-dot"></span>
-                    <span>Analysis Complete</span>
+                    <span>AI Inference Complete</span>
                 </div>
                 <h1 class="results-title">
-                    Your <span class="gradient-text">Analysis Results</span>
+                    Analysis <span class="gradient-text">Results</span>
                 </h1>
-                <p class="results-subtitle">Detailed breakdown of your exercise performance</p>
             </div>
         </div>
 
-        <!-- Overall Statistics -->
         <div class="overall-stats-wrapper">
-            <div class="results-stats" id="resultsStats">
+            <div class="results-stats">
                 <div class="stat-card">
                     <h4>{{ overall_statistics.total_reps }}</h4>
-                    <p>Total Repetitions</p>
+                    <p>Total Reps</p>
                 </div>
                 <div class="stat-card">
-                    <h4>{{ overall_statistics.complete_reps }}</h4>
-                    <p>Complete Reps</p>
+                    <h4>{{ overall_statistics.perfect_reps }}</h4>
+                    <p>Perfect Reps</p>
                 </div>
                 <div class="stat-card">
-                    <h4>{{ overall_statistics.completion_rate }}</h4>
-                    <p>Completion Rate</p>
-                </div>
-                <div class="stat-card">
-                    <h4>{{ overall_statistics.average_rep_time }}</h4>
-                    <p>Average Rep Time</p>
+                    <h4>{{ overall_statistics.success_rate }}%</h4>
+                    <p>Success Rate</p>
                 </div>
             </div>
 
-            <!-- Form Quality Summary -->
             <div class="form-quality-summary">
-                <h3>Form Quality Summary</h3>
+                <h3>AI Model Consensus</h3>
                 <div class="quality-badges">
-                    <div class="quality-badge {% if overall_statistics.form_checks_summary.full_depth == '17/17' %}perfect{% endif %}">
-                        <span class="badge-label">Full Depth</span>
-                        <span class="badge-value">{{ overall_statistics.form_checks_summary.full_depth }}</span>
+                    <div class="quality-badge">
+                        <span class="badge-label">ROM Correct</span>
+                        <span class="badge-value">{{ overall_statistics.correct_counts.rom }}/{{ overall_statistics.total_reps }}</span>
                     </div>
-                    <div class="quality-badge {% if overall_statistics.form_checks_summary.full_lockout == '17/17' %}perfect{% endif %}">
-                        <span class="badge-label">Full Lockout</span>
-                        <span class="badge-value">{{ overall_statistics.form_checks_summary.full_lockout }}</span>
+                    <div class="quality-badge">
+                        <span class="badge-label">Hips Correct</span>
+                        <span class="badge-value">{{ overall_statistics.correct_counts.hips }}/{{ overall_statistics.total_reps }}</span>
                     </div>
-                    <div class="quality-badge {% if overall_statistics.form_checks_summary.hip_alignment == '17/17' %}perfect{% endif %}">
-                        <span class="badge-label">Hip Alignment</span>
-                        <span class="badge-value">{{ overall_statistics.form_checks_summary.hip_alignment }}</span>
-                    </div>
-                    <div class="quality-badge {% if overall_statistics.form_checks_summary.body_position == '17/17' %}perfect{% endif %}">
-                        <span class="badge-label">Body Position</span>
-                        <span class="badge-value">{{ overall_statistics.form_checks_summary.body_position }}</span>
-                    </div>
-                    <div class="quality-badge {% if overall_statistics.form_checks_summary.head_position == '17/17' %}perfect{% endif %}">
-                        <span class="badge-label">Head Position</span>
-                        <span class="badge-value">{{ overall_statistics.form_checks_summary.head_position }}</span>
+                    <div class="quality-badge">
+                        <span class="badge-label">Head Correct</span>
+                        <span class="badge-value">{{ overall_statistics.correct_counts.head }}/{{ overall_statistics.total_reps }}</span>
                     </div>
                 </div>
             </div>
-
-            {% if overall_statistics.ml_summary %}
-            <div class="ai-assessment-summary">
-                <div class="ai-header">
-                    <h3>
-                        <span class="ai-badge">🤖 AI</span>
-                        AI-Powered Form Assessment
-                    </h3>
-                    <span class="success-rate">{{ overall_statistics.ml_summary.success_rate }} Success Rate</span>
-                </div>
-                
-                <div class="ai-quality-badges">
-                    <div class="ai-quality-badge">
-                        <span class="badge-label">Range of Motion</span>
-                        <span class="badge-value">{{ overall_statistics.ml_summary.range_of_motion }}</span>
-                    </div>
-                    <div class="ai-quality-badge">
-                        <span class="badge-label">Hip Alignment</span>
-                        <span class="badge-value">{{ overall_statistics.ml_summary.hips }}</span>
-                    </div>
-                    <div class="ai-quality-badge">
-                        <span class="badge-label">Head Position</span>
-                        <span class="badge-value">{{ overall_statistics.ml_summary.head_position }}</span>
-                    </div>
-                    <div class="ai-quality-badge highlight">
-                        <span class="badge-label">All Criteria Perfect</span>
-                        <span class="badge-value">{{ overall_statistics.ml_summary.all_correct }}</span>
-                    </div>
-                    <div class="ai-quality-badge">
-                        <span class="badge-label">High Confidence</span>
-                        <span class="badge-value">{{ overall_statistics.ml_summary.high_confidence }}</span>
-                    </div>
-                </div>
-            </div>
-            {% endif %}
         </div>
 
-        <!-- Individual Repetitions List View -->
         <div class="repetitions-section">
             <div class="section-header-with-actions">
-                <div class="section-header-inline">
-                    <h2>Individual Repetitions</h2>
-                    <p>Detailed analysis for each repetition</p>
-                </div>
-                <button class="expand-all-btn" id="expandAllBtn">
-                    Expand All Details
-                </button>
+                <h2>Repetition Breakdown</h2>
+                <button class="expand-all-btn" id="expandAllBtn">Expand All Details</button>
             </div>
 
             <div class="reps-list" id="repsList">
                 {% for clip in repetition_clips %}
                 <div class="rep-item" data-rep="{{ clip.rep_number }}">
-                    <!-- Rep Header -->
+                    
                     <div class="rep-header">
                         <div class="rep-video-thumbnail">
                             <video preload="metadata">
@@ -142,237 +85,91 @@
                         <div class="rep-main-info">
                             <div class="rep-title-row">
                                 <h3>Repetition #{{ clip.rep_number }}</h3>
-                                <span class="rep-time-badge">{{ clip.metrics.summary.total_time }}</span>
+                                <span class="rep-time-badge">{{ clip.metrics.duration|floatformat:2 }}s Duration</span>
                             </div>
-                            
-                            <div class="rep-quick-stats">
-                                <span class="quick-stat">
-                                    <span class="stat-icon">⬇</span> {{ clip.metrics.summary.down_time }}
-                                </span>
-                                <span class="quick-stat">
-                                    <span class="stat-icon">⬆</span> {{ clip.metrics.summary.up_time }}
-                                </span>
-                                <span class="quick-stat">
-                                    <span class="stat-icon">📐</span> {{ clip.metrics.summary.rom }}
-                                </span>
-                            </div>
-                            {% if clip.metrics.ml_overall %}
-                            <div class="ml-overall-card">
-                                <div class="ml-header">
-                                    <span class="ai-badge-small">🤖 AI Assessment</span>
-                                    <span class="confidence-badge confidence-{{ clip.metrics.ml_overall.confidence }}">
-                                        {{ clip.metrics.ml_overall.confidence|title }} Confidence
-                                    </span>
-                                </div>
-                                <p class="ml-message {% if clip.metrics.ml_overall.overall_correct %}success{% else %}warning{% endif %}">
-                                    {{ clip.metrics.ml_overall.message }}
-                                </p>
-                                <div class="ml-criteria-count">
-                                    <span class="{% if clip.metrics.ml_overall.criteria_passed == clip.metrics.ml_overall.criteria_total %}all-passed{% endif %}">
-                                        {{ clip.metrics.ml_overall.criteria_passed }}/{{ clip.metrics.ml_overall.criteria_total }} criteria passed
-                                    </span>
-                                </div>
-                            </div>
-                            {% endif %}
-                            <!-- Inline Form Checks -->
-                            <!-- Form Checks: Rule-Based -->
-                            <div class="form-checks-section">
-                                <h5 class="checks-title">Rule-Based Checks</h5>
-                                <div class="form-checks-inline">
-                                    <span class="form-pill {% if clip.metrics.form_checks.full_depth.status %}correct{% else %}incorrect{% endif %}">
-                                        {% if clip.metrics.form_checks.full_depth.status %}✓{% else %}✗{% endif %}
-                                        Full Depth
-                                    </span>
-                                    <span class="form-pill {% if clip.metrics.form_checks.full_lockout.status %}correct{% else %}incorrect{% endif %}">
-                                        {% if clip.metrics.form_checks.full_lockout.status %}✓{% else %}✗{% endif %}
-                                        Lockout
-                                    </span>
-                                    <span class="form-pill {% if clip.metrics.form_checks.hip_alignment.status %}correct{% else %}incorrect{% endif %}">
-                                        {% if clip.metrics.form_checks.hip_alignment.status %}✓{% else %}✗{% endif %}
-                                        Hip Alignment
-                                    </span>
-                                    <span class="form-pill {% if clip.metrics.form_checks.body_straight.status %}correct{% else %}incorrect{% endif %}">
-                                        {% if clip.metrics.form_checks.body_straight.status %}✓{% else %}✗{% endif %}
-                                        Body Position
-                                    </span>
-                                    <span class="form-pill {% if clip.metrics.form_checks.head_position.status %}correct{% else %}incorrect{% endif %}">
-                                        {% if clip.metrics.form_checks.head_position.status %}✓{% else %}✗{% endif %}
-                                        Head Position
-                                    </span>
-                                </div>
-                            </div>
-                            
-                            <!-- AI Predictions Pills (collapsed view) -->
-                            {% if clip.metrics.ml_form_checks %}
+
                             <div class="ai-predictions-inline">
-                                <div class="ai-section-label">
-                                    <span class="ai-icon-small">🤖</span>
-                                    <span>AI Predictions</span>
-                                </div>
-                                <div class="ai-pills-row">
-                                    {% for criterion, pred in clip.metrics.ml_form_checks.items %}
-                                    {% if pred.success != False %}
-                                    <span class="ai-pill {% if pred.status %}correct{% else %}incorrect{% endif %}" 
-                                        title="{{ pred.confidence }} confidence">
-                                        <span class="pill-icon">{% if pred.status %}✓{% else %}✗{% endif %}</span>
-                                        <span class="pill-text">{{ pred.label|slice:":-5"|truncatechars:12 }}</span>
-                                        <span class="pill-dots conf-{{ pred.confidence|lower }}">
-                                            {% if pred.confidence == 'High' %}●●●{% elif pred.confidence == 'Medium' %}●●○{% else %}●○○{% endif %}
+                                {% for model_name, pred in clip.metrics.predictions.items %}
+                                    <div class="ai-pill {% if pred.is_correct %}correct{% else %}incorrect{% endif %}">
+                                        <span class="pill-icon">{% if pred.is_correct %}✓{% else %}✗{% endif %}</span>
+                                        <span class="pill-text">{{ model_name|upper }}</span>
+                                        <span class="conf-dot" 
+                                              style="opacity: {{ pred.confidence }};"
+                                              title="Confidence: {{ pred.confidence|floatformat:2 }}">
                                         </span>
-                                    </span>
-                                    {% endif %}
-                                    {% endfor %}
-                                </div>
+                                    </div>
+                                {% endfor %}
                             </div>
-                            {% endif %}
-                            
+                        </div>
                         
                         <button class="toggle-details" data-target="details-{{ clip.rep_number }}">
-                            <span class="toggle-text">Show Details</span>
+                            <span class="toggle-text">Show Features</span>
                             <svg class="toggle-icon" width="20" height="20" viewBox="0 0 20 20" fill="none">
-                                <path d="M5 7.5L10 12.5L15 7.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M5 7.5L10 12.5L15 7.5" stroke="currentColor" stroke-width="2"/>
                             </svg>
                         </button>
                     </div>
                     
-                    <!-- Detailed Metrics (Collapsed by default) -->
                     <div class="rep-details" id="details-{{ clip.rep_number }}" style="display: none;">
-                        <div class="metrics-grid">
-                            <!-- Timing Column -->
-                            <div class="metric-column">
-                                <div class="column-header">
-                                    <span class="column-icon">⏱️</span>
-                                    <h4>Timing</h4>
+                        
+                        <div class="details-section-title">Model Confidence</div>
+                        <div class="confidence-grid">
+                            {% for model_name, pred in clip.metrics.predictions.items %}
+                            <div class="confidence-card">
+                                <div class="conf-header">
+                                    <span class="model-name">{{ model_name|title }}</span>
+                                    <span class="status-text {% if pred.is_correct %}text-green{% else %}text-red{% endif %}">
+                                        {% if pred.is_correct %}Correct{% else %}Incorrect{% endif %}
+                                    </span>
                                 </div>
-                                <div class="metric-row">
-                                    <span>Down Time:</span>
-                                    <span>{{ clip.metrics.detailed.timing.down_time|floatformat:2 }}s</span>
+                                <div class="conf-bar-bg">
+                                    <div class="conf-bar-fill {% if pred.confidence > 0.9 %}bg-green{% elif pred.confidence > 0.75 %}bg-yellow{% else %}bg-red{% endif %}"
+                                         style="width: {% widthratio pred.confidence 1 100 %}%;"></div>
                                 </div>
-                                <div class="metric-row">
-                                    <span>Up Time:</span>
-                                    <span>{{ clip.metrics.detailed.timing.up_time|floatformat:2 }}s</span>
-                                </div>
-                                <div class="metric-row">
-                                    <span>Bottom Pause:</span>
-                                    <span>{{ clip.metrics.detailed.timing.bottom_pause|floatformat:2 }}s</span>
-                                </div>
+                                <div class="conf-value">{{ pred.confidence|floatformat:2 }} Confidence</div>
                             </div>
-                            
-                            <!-- Range of Motion Column -->
-                            <div class="metric-column">
-                                <div class="column-header">
-                                    <span class="column-icon">📐</span>
-                                    <h4>Range of Motion</h4>
-                                </div>
-                                <div class="metric-row">
-                                    <span>Min Angle:</span>
-                                    <span>{{ clip.metrics.detailed.range_of_motion.min_elbow_angle|floatformat:1 }}°</span>
-                                </div>
-                                <div class="metric-row">
-                                    <span>Max Angle:</span>
-                                    <span>{{ clip.metrics.detailed.range_of_motion.max_elbow_angle|floatformat:1 }}°</span>
-                                </div>
-                                <div class="metric-row">
-                                    <span>Range:</span>
-                                    <span>{{ clip.metrics.detailed.range_of_motion.range_of_motion|floatformat:1 }}°</span>
-                                </div>
-                            </div>
-                            
-                            <!-- Body Position Column -->
-                            <div class="metric-column">
-                                <div class="column-header">
-                                    <span class="column-icon">🏋️</span>
-                                    <h4>Body Position</h4>
-                                </div>
-                                <div class="metric-row">
-                                    <span>Hip Deviation:</span>
-                                    <span>{{ clip.metrics.detailed.plank.hip_deviation_mean_abs|floatformat:3 }}</span>
-                                </div>
-                                <div class="metric-row">
-                                    <span>Body Angle:</span>
-                                    <span>{{ clip.metrics.detailed.plank.body_angle_bottom_deg|floatformat:1 }}°</span>
-                                </div>
-                                <div class="metric-row">
-                                    <span>Angle Range:</span>
-                                    <span>{{ clip.metrics.detailed.plank.body_angle_range_deg|floatformat:1 }}°</span>
-                                </div>
-                            </div>
-                            
-                            <!-- Head Position Column -->
-                            {% if clip.metrics.detailed.head %}
-                            <div class="metric-column">
-                                <div class="column-header">
-                                    <span class="column-icon">👤</span>
-                                    <h4>Head Position</h4>
-                                </div>
-                                <div class="metric-row">
-                                    <span>Head Angle:</span>
-                                    <span>{{ clip.metrics.detailed.head.torso_head_angle_bottom|floatformat:1 }}°</span>
-                                </div>
-                                <div class="metric-row">
-                                    <span>Angle Range:</span>
-                                    <span>{{ clip.metrics.detailed.head.torso_head_angle_range|floatformat:1 }}°</span>
-                                </div>
-                                <div class="metric-row">
-                                    <span>Min/Max:</span>
-                                    <span>{{ clip.metrics.detailed.head.torso_head_angle_min|floatformat:1 }}° / {{ clip.metrics.detailed.head.torso_head_angle_max|floatformat:1 }}°</span>
-                                </div>
-                            </div>
-                            {% else %}
-                            <div class="metric-column">
-                                <div class="column-header">
-                                    <span class="column-icon">👤</span>
-                                    <h4>Head Position</h4>
-                                </div>
-                                <div class="metric-row">
-                                    <span class="text-muted">Not available</span>
-                                </div>
-                            </div>
-                            {% endif %}
+                            {% endfor %}
                         </div>
-                        <!-- NEW: ML Predictions Column -->
-                        {% if clip.metrics.ml_form_checks %}
-                        <div class="metric-column ml-column">
-                            <div class="column-header ai-header">
-                                <span class="column-icon">🤖</span>
-                                <h4>AI Predictions</h4>
-                            </div>
-                            
-                            {% for criterion, pred in clip.metrics.ml_form_checks.items %}
-                            <div class="metric-row ml-prediction-row">
-                                <div class="prediction-header">
-                                    <span class="prediction-label">{{ pred.label|slice:":-5" }}</span>
-                                    <span class="prediction-status {% if pred.status %}correct{% else %}incorrect{% endif %}">
-                                        {{ pred.value }}
-                                    </span>
+
+                        <div class="details-section-title">Extracted Features (Model Inputs)</div>
+                        <div class="features-grid">
+                            {% for category, features in clip.metrics.features.items %}
+                            <div class="feature-column">
+                                <div class="column-header">
+                                    <h4>{{ category|upper }} Features</h4>
                                 </div>
-                                <div class="prediction-details">
-                                    <span class="confidence-badge-small confidence-{{ pred.confidence|lower }}">
-                                        {{ pred.confidence }} confidence
-                                    </span>
-                                    {% if pred.probability %}
-                                    <span class="probability-text">
-                                        {{ pred.probability|floatformat:1 }}% incorrect
-                                    </span>
-                                    {% endif %}
+                                <div class="feature-list">
+                                    {% for key, value in features.items %}
+                                    <div class="feature-row">
+                                        <span class="f-key">{{ key }}</span>
+                                        <span class="f-val">
+                                            {% if value|stringformat:"s" == "True" %}
+                                                <span class="bool-true">Yes</span>
+                                            {% elif value|stringformat:"s" == "False" %}
+                                                <span class="bool-false">No</span>
+                                            {% elif value|floatformat %}
+                                                {{ value|floatformat:2 }}
+                                            {% else %}
+                                                {{ value }}
+                                            {% endif %}
+                                        </span>
+                                    </div>
+                                    {% endfor %}
                                 </div>
                             </div>
                             {% endfor %}
                         </div>
-                        {% endif %}
+
                     </div>
                 </div>
                 {% empty %}
-                <div class="no-results">
-                    <p>No repetition clips found.</p>
-                </div>
+                <div class="no-results">No repetitions processed.</div>
                 {% endfor %}
             </div>
         </div>
     </div>
 </section>
 
-<!-- Video Modal -->
 <div class="video-modal" id="videoModal">
     <div class="video-modal-overlay"></div>
     <div class="video-modal-content">

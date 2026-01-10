@@ -18,7 +18,6 @@ def compute_pushup_signals(landmarks_data, fps):
     # Computing signals visibility score
     key_points = [7, 8, 11, 12, 13, 14, 15, 16, 23, 24, 27, 28]  # Shoulder, elbow, wrist, hip, ankle
     visibility_scores = compute_visibility_scores(landmarks_data, key_points)
-    print("Visibility scores:", visibility_scores)
     signals = {}
 
     # BASIC AVERAGE Y-POSITIONS
@@ -233,22 +232,22 @@ def compute_pushup_signals(landmarks_data, fps):
         hip_center_x_ = (lm[23]['x'] + lm[24]['x']) / 2
 
         torso_angle = np.degrees(np.arctan2(
-            hip_center_y - shoulder_center_y,
-            hip_center_x_ - shoulder_center_x_
+            abs(hip_center_y - shoulder_center_y),
+            abs(hip_center_x_ - shoulder_center_x_)
         ))
-        torso_angles.append(np.rad2deg(np.unwrap(np.deg2rad(torso_angle))))
+        torso_angles.append(torso_angle)
 
         torso_angle_left = np.degrees(np.arctan2(
-            lm[23]['y'] - lm[11]['y'],
-            lm[23]['x'] - lm[11]['x']
+            abs(lm[23]['y'] - lm[11]['y']),
+            abs(lm[23]['x'] - lm[11]['x'])
         ))
-        torso_angles_left.append(np.rad2deg(np.unwrap(np.deg2rad(torso_angle_left))))
+        torso_angles_left.append(torso_angle_left)
 
         torso_angle_right = np.degrees(np.arctan2(
-            lm[24]['y'] - lm[12]['y'],
-            lm[24]['x'] - lm[12]['x']
+            abs(lm[24]['y'] - lm[12]['y']),
+            abs(lm[24]['x'] - lm[12]['x'])
         ))
-        torso_angles_right.append(np.rad2deg(np.unwrap(np.deg2rad(torso_angle_right))))
+        torso_angles_right.append(torso_angle_right)
 
         # BODY ANGLE (ANKLE - HIP - SHOULDER)
         shoulder_avg = {'x': (lm[11]['x'] + lm[12]['x']) / 2, 'y': (lm[11]['y'] + lm[12]['y']) / 2}

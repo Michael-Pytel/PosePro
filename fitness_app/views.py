@@ -94,55 +94,82 @@ def upload_video(request):
 
 
 def results_view(request):
-    """Display processing results"""
+    """Display AI processing results"""
     results_data = request.session.get('analysis_results')
     
     if not results_data:
         return redirect('/demo/upload/')
     
-    # Get data from session
-    total_reps = results_data.get('total_reps', 0)
+    # 1. Basic Data
     output_dir = results_data.get('output_dir', '')
-    repetitions_data = results_data.get('repetitions', [])
-    overall_statistics = results_data.get('overall_statistics', {})
+    repetitions = results_data.get('repetitions', [])
+    total_reps = len(repetitions)
     
-    # Build full path to scan directory
+    # 2. Compute AI Statistics
+    # We aggregate the predictions to show the "Summary" cards at the top
+    stats = {
+        'total_reps': total_reps,
+        'perfect_reps': 0,
+        'correct_counts': {'rom': 0, 'hips': 0, 'head': 0},
+        'high_confidence_count': 0
+    }
+
+    for rep in repetitions:
+        preds = rep.get('predictions', {})
+        
+        # Check if this rep is "Perfect" (All available models say Correct)
+        is_perfect = True
+        has_predictions = False
+        
+        for key, data in preds.items():
+            if data:
+                has_predictions = True
+                if data.get('is_correct'):
+                    stats['correct_counts'][key] = stats['correct_counts'].get(key, 0) + 1
+                else:
+                    is_perfect = False
+                
+                # Count high confidence (> 0.85)
+                if data.get('confidence', 0) > 0.85:
+                    stats['high_confidence_count'] += 1
+        
+        if has_predictions and is_perfect:
+            stats['perfect_reps'] += 1
+
+    # Calculate percentages for the UI
+    stats['success_rate'] = int((stats['perfect_reps'] / total_reps * 100) if total_reps > 0 else 0)
+
+    # 3. Match Videos to Reps
     output_path = os.path.join(settings.MEDIA_ROOT, output_dir)
-    
-    # Collect video clips with their metrics
     repetition_clips = []
+    
     if os.path.exists(output_path):
         video_files = sorted([f for f in os.listdir(output_path) if f.endswith('.mp4')])
         
         for filename in video_files:
-            # Extract rep number from filename (e.g., "rep_1.mp4" -> 1)
             try:
+                # Extract rep ID from "rep_1.mp4"
                 if 'rep_' in filename:
-                    rep_part = filename.split('rep_')[1]  # Gets "1.mp4" from "filename_rep_1.mp4"
-                    rep_number = int(rep_part.split('.')[0])  # Gets 1
+                    rep_part = filename.split('rep_')[1]
+                    rep_id = int(rep_part.split('.')[0])
+                    
+                    # Find the matching rep object from session
+                    # Note: We match 'rep_id' from processor with 'rep_number' in filename
+                    metrics = next((r for r in repetitions if r.get('rep_id') == rep_id), None)
+                    
+                    if metrics:
+                        repetition_clips.append({
+                            'rep_number': rep_id,
+                            'filename': filename,
+                            'video_url': f'{settings.MEDIA_URL}{output_dir}/{filename}',
+                            'metrics': metrics
+                        })
             except (IndexError, ValueError):
                 continue
-            
-            # Find matching metrics for this rep
-            rep_metrics = next(
-                (rep for rep in repetitions_data if rep.get('rep_number') == rep_number),
-                None
-            )
-            
-            if rep_metrics:
-                repetition_clips.append({
-                    'filename': filename,
-                    'video_url': f'/media/{output_dir}/{filename}',
-                    'rep_number': rep_number,
-                    'metrics': rep_metrics
-                })
-    
-    # Pass complete data to template
+
     context = {
-        'total_reps': total_reps,
+        'overall_statistics': stats,
         'repetition_clips': repetition_clips,
-        'overall_statistics': overall_statistics
     }
     
     return render(request, "uploading_file/results_view.html", context)
-

@@ -92,11 +92,19 @@ document.addEventListener('DOMContentLoaded', function() {
     const modalOverlay = document.querySelector('.video-modal-overlay');
     
     console.log('Found video thumbnails:', videoThumbnails.length);
+    console.log('Modal elements:', {
+        modal: !!videoModal,
+        video: !!modalVideo,
+        close: !!modalClose,
+        overlay: !!modalOverlay
+    });
     
     // Open modal when clicking video thumbnail
     videoThumbnails.forEach(thumbnail => {
         thumbnail.addEventListener('click', function(e) {
             e.preventDefault();
+            e.stopPropagation();
+            
             const video = this.querySelector('video source');
             if (!video) {
                 console.error('Video source not found in thumbnail');
@@ -107,22 +115,49 @@ document.addEventListener('DOMContentLoaded', function() {
             const videoSrc = video.getAttribute('src').split('#')[0];
             console.log('Opening video modal for:', videoSrc);
             
+            if (!modalVideo) {
+                console.error('Modal video element not found');
+                return;
+            }
+            
             // Set video source and load
-            modalVideo.querySelector('source').setAttribute('src', videoSrc);
+            const existingSource = modalVideo.querySelector('source');
+            if (existingSource) {
+                existingSource.setAttribute('src', videoSrc);
+            } else {
+                // Create source element if it doesn't exist
+                const source = document.createElement('source');
+                source.setAttribute('src', videoSrc);
+                source.setAttribute('type', 'video/mp4');
+                modalVideo.appendChild(source);
+            }
+            
+            // Load the video
             modalVideo.load();
             
             // Show modal
-            videoModal.classList.add('active');
-            document.body.style.overflow = 'hidden'; // Prevent background scrolling
+            if (videoModal) {
+                videoModal.classList.add('active');
+                document.body.style.overflow = 'hidden'; // Prevent background scrolling
+                
+                // Auto-play after load (optional)
+                modalVideo.play().catch(err => {
+                    console.warn('Autoplay prevented by browser:', err);
+                });
+            }
         });
     });
     
     // Close modal function
     function closeModal() {
         console.log('Closing video modal');
+        if (!videoModal) return;
+        
         videoModal.classList.remove('active');
-        modalVideo.pause();
-        modalVideo.currentTime = 0; // Reset video to start
+        if (modalVideo) {
+            modalVideo.pause();
+            modalVideo.currentTime = 0; // Reset video to start
+        }
         document.body.style.overflow = ''; // Restore scrolling
     }
     
@@ -138,7 +173,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Escape key to close
     document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape' && videoModal.classList.contains('active')) {
+        if (e.key === 'Escape' && videoModal && videoModal.classList.contains('active')) {
             closeModal();
         }
     });

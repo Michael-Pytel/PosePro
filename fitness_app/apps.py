@@ -22,7 +22,6 @@ class FitnessAppConfig(AppConfig):
         base_path = os.path.join(settings.BASE_DIR, 'fitness_app', 'core', 'models')
 
         print("\n initializing ML Models...")
-        print("base path:", base_path)
         for part, filename in model_files.items():
             path = os.path.join(base_path, filename)
 

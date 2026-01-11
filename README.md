@@ -1,5 +1,5 @@
 # PosePro
-The html templates are still temporary, text for now is just for aestetic reasons.
+The html templates are still temporary, text for now is just for aesthetic reasons.
 
 # HOW TO SETUP (python=3.12)
 ``` bash

@@ -7,21 +7,19 @@ class FitnessAppConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
     name = 'fitness_app'
 
-    # Dictionary to hold multiple models: {'elbow': pipeline_obj, 'shoulder': ...}
     models = {}
 
     def ready(self):
         """
         Runs once on server startup. Loads all body part models into memory.
         """
-        # Define your mapping of { key: filename }
         model_files = {
             'hips': 'best_model_hips.pkl',
             'head': 'best_model_head.pkl',
             'rom': 'best_model_rom.pkl'
         }
 
-        base_path = os.path.join(settings.BASE_DIR, 'fitness_app\\ml\\models\\')
+        base_path = os.path.join(settings.BASE_DIR, 'fitness_app\\core\\models\\')
 
         print("\n initializing ML Models...")
         

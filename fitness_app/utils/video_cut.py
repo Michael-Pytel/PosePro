@@ -89,8 +89,8 @@ def multi_rep_processing(args):
 
     rep_vid_labels = []
     for rep in repetitions:
-        video_in = f"[v{rep["rep_id"] - 1}]"
-        video_out = f"[v{rep["rep_id"] - 1}o]"
+        video_in = f"[v{rep['rep_id'] - 1}]"
+        video_out = f"[v{rep['rep_id'] - 1}o]"
         parts.append(
             f"{video_in}trim=start_frame={rep['start_frame']}:end_frame={rep['end_frame']},"
             f"setpts=PTS-STARTPTS{video_out};"
@@ -105,8 +105,8 @@ def multi_rep_processing(args):
         for rep in repetitions:
             start_time = Fraction(rep["start_frame"], 1) / fps
             end_time = Fraction(rep["end_frame"], 1) / fps
-            audio_in = f"[a{rep["rep_id"] - 1}]"
-            audio_out = f"[a{rep["rep_id"] - 1}o]"
+            audio_in = f"[a{rep['rep_id'] - 1}]"
+            audio_out = f"[a{rep['rep_id'] - 1}o]"
 
             parts.append(
                 f"{audio_in}atrim=start={frac_to_sec_str(start_time)}:"
@@ -139,7 +139,7 @@ def multi_rep_processing(args):
 
     filename = Path(video_path).stem
     for i, (video_label, rep) in enumerate(zip(rep_vid_labels, repetitions)):
-        output_path = os.path.join(output_dir, f"{filename}_rep_{rep["rep_id"]}.mp4")
+        output_path = os.path.join(output_dir, f"{filename}_rep_{rep['rep_id']}.mp4")
         outputs.append(output_path)
 
         cmd += ["-map", video_label]

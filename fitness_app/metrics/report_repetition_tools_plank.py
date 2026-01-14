@@ -204,6 +204,5 @@ def get_plank(signal, visibility_scores, repetition, fps) -> Dict[str, Any]:
         'body_angle_q_50_deg': plank.body_angle_q_50_deg,
         'body_angle_q_75_deg': plank.body_angle_q_75_deg,
         'body_angle_q_90_deg': plank.body_angle_q_90_deg,
-        'body_angle_std': plank.body_angle_std,
-        'body_angle': plank.body_angle.tolist(),
+        'body_angle_std': plank.body_angle_std
     }

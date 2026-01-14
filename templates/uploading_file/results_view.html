@@ -85,17 +85,31 @@
                         <div class="rep-main-info">
                             <div class="rep-title-row">
                                 <h3>Repetition #{{ clip.rep_number }}</h3>
-                                <span class="rep-time-badge">{{ clip.metrics.duration|floatformat:2 }}s Duration</span>
+                                <div class="rep-time-badges">
+                                    <span class="rep-time-badge">{{ clip.metrics.duration|floatformat:2 }}s Duration</span>
+                                    {% if clip.metrics.down_time %}
+                                    <span class="rep-time-badge time-down">↓ {{ clip.metrics.down_time|floatformat:2 }}s</span>
+                                    {% endif %}
+                                    {% if clip.metrics.up_time %}
+                                    <span class="rep-time-badge time-up">↑ {{ clip.metrics.up_time|floatformat:2 }}s</span>
+                                    {% endif %}
+                                </div>
                             </div>
 
                             <div class="ai-predictions-inline">
                                 {% for model_name, pred in clip.metrics.predictions.items %}
                                     <div class="ai-pill {% if pred.is_correct %}correct{% else %}incorrect{% endif %}">
                                         <span class="pill-icon">{% if pred.is_correct %}✓{% else %}✗{% endif %}</span>
-                                        <span class="pill-text">{{ model_name|upper }}</span>
-                                        <span class="conf-dot" 
-                                              style="opacity: {{ pred.confidence }};"
-                                              title="Confidence: {{ pred.confidence|floatformat:2 }}">
+                                        <span class="pill-text">
+                                            {% if model_name == 'rom' %}
+                                                Range of Motion
+                                            {% elif model_name == 'hips' %}
+                                                Hip Alignment
+                                            {% elif model_name == 'head' %}
+                                                Head Position
+                                            {% else %}
+                                                {{ model_name|title }}
+                                            {% endif %}
                                         </span>
                                     </div>
                                 {% endfor %}
@@ -103,7 +117,7 @@
                         </div>
                         
                         <button class="toggle-details" data-target="details-{{ clip.rep_number }}">
-                            <span class="toggle-text">Show Features</span>
+                            <span class="toggle-text">Show Details</span>
                             <svg class="toggle-icon" width="20" height="20" viewBox="0 0 20 20" fill="none">
                                 <path d="M5 7.5L10 12.5L15 7.5" stroke="currentColor" stroke-width="2"/>
                             </svg>
@@ -117,7 +131,17 @@
                             {% for model_name, pred in clip.metrics.predictions.items %}
                             <div class="confidence-card">
                                 <div class="conf-header">
-                                    <span class="model-name">{{ model_name|title }}</span>
+                                    <span class="model-name">
+                                        {% if model_name == 'rom' %}
+                                            Range of Motion
+                                        {% elif model_name == 'hips' %}
+                                            Hip Alignment
+                                        {% elif model_name == 'head' %}
+                                            Head Position
+                                        {% else %}
+                                            {{ model_name|title }}
+                                        {% endif %}
+                                    </span>
                                     <span class="status-text {% if pred.is_correct %}text-green{% else %}text-red{% endif %}">
                                         {% if pred.is_correct %}Correct{% else %}Incorrect{% endif %}
                                     </span>
@@ -136,7 +160,17 @@
                             {% for category, features in clip.metrics.features.items %}
                             <div class="feature-column">
                                 <div class="column-header">
-                                    <h4>{{ category|upper }} Features</h4>
+                                    <h4>
+                                        {% if category == 'rom' %}
+                                            RANGE OF MOTION
+                                        {% elif category == 'hips' %}
+                                            HIP ALIGNMENT
+                                        {% elif category == 'head' %}
+                                            HEAD POSITION
+                                        {% else %}
+                                            {{ category|upper }}
+                                        {% endif %}
+                                    </h4>
                                 </div>
                                 <div class="feature-list">
                                     {% for key, value in features.items %}

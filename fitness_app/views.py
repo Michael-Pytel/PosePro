@@ -106,7 +106,6 @@ def results_view(request):
     total_reps = len(repetitions)
     
     # 2. Compute AI Statistics
-    # We aggregate the predictions to show the "Summary" cards at the top
     stats = {
         'total_reps': total_reps,
         'perfect_reps': 0,
@@ -144,7 +143,19 @@ def results_view(request):
     repetition_clips = []
     
     if os.path.exists(output_path):
-        video_files = sorted([f for f in os.listdir(output_path) if f.endswith('.mp4')])
+        video_files = [f for f in os.listdir(output_path) if f.endswith('.mp4')]
+    
+        # Sort numerically by rep number
+        def get_rep_number(filename):
+            try:
+                if 'rep_' in filename:
+                    rep_part = filename.split('rep_')[1]
+                    return int(rep_part.split('.')[0])
+                return 0
+            except (IndexError, ValueError):
+                return 0
+        
+        video_files = sorted(video_files, key=get_rep_number)
         
         for filename in video_files:
             try:
@@ -154,15 +165,25 @@ def results_view(request):
                     rep_id = int(rep_part.split('.')[0])
                     
                     # Find the matching rep object from session
-                    # Note: We match 'rep_id' from processor with 'rep_number' in filename
                     metrics = next((r for r in repetitions if r.get('rep_id') == rep_id), None)
                     
                     if metrics:
+                        # Add timing data to metrics if available
+                        # Assuming your processor adds timing to features['timing']
+                        timing_data = metrics.get('features', {}).get('timing', {})
+                        
+                        # Merge timing into the main metrics dict for easy template access
+                        metrics_with_timing = {**metrics}
+                        if timing_data:
+                            metrics_with_timing['up_time'] = timing_data.get('up_time')
+                            metrics_with_timing['down_time'] = timing_data.get('down_time')
+                            metrics_with_timing['bottom_pause'] = timing_data.get('bottom_pause')
+                        
                         repetition_clips.append({
                             'rep_number': rep_id,
                             'filename': filename,
                             'video_url': f'{settings.MEDIA_URL}{output_dir}/{filename}',
-                            'metrics': metrics
+                            'metrics': metrics_with_timing  # Use the enhanced metrics
                         })
             except (IndexError, ValueError):
                 continue

@@ -1,5 +1,5 @@
 import pandas as pd
-from fitness_app.metrics.report_repetition_tools_basic import get_rom
+from fitness_app.metrics.report_repetition_tools_basic import get_rom, get_timing
 from fitness_app.metrics.report_repetition_tools_plank import get_plank
 from fitness_app.metrics.report_repetition_tools_head import get_head
 
@@ -18,11 +18,13 @@ class FeatureExtractor:
         raw_rom = get_rom(signals, visibility_scores, rep, fps)
         raw_plank = get_plank(signals, visibility_scores, rep, fps)
         raw_head = get_head(signals, visibility_scores, rep)
+        raw_timing = get_timing(signals, visibility_scores, rep, fps)
         
         ui_features = {
             'rom': raw_rom,
             'hips': raw_plank,
-            'head': raw_head
+            'head': raw_head,
+            'timing': raw_timing
         }
 
         # 2. Transform into model-ready DataFrames

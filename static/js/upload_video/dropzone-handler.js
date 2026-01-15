@@ -20,12 +20,37 @@ let activeVideoElement = null;
 let startTime = null;
 let timerInterval = null;
 let currentTipIndex = 0;
+let progressPollingInterval = null;
+let currentSessionId = null;
+
+// Stage to step mapping
+const stageToStep = {
+    'UPLOADING': 'upload',
+    'EXTRACTING_LANDMARKS': 'landmarks',
+    'COMPUTING_SIGNALS': 'signals',
+    'DETECTING_REPS': 'reps',
+    'EXTRACTING_FEATURES': 'features',
+    'MAKING_PREDICTIONS': 'prediction',
+    'CUTTING_VIDEOS': 'prediction',
+    'COMPLETE': 'prediction'
+};
+
+// Stage to icon mapping
+const stageIcons = {
+    'UPLOADING': '',
+    'EXTRACTING_LANDMARKS': '',
+    'COMPUTING_SIGNALS': '',
+    'DETECTING_REPS': '',
+    'EXTRACTING_FEATURES': '',
+    'MAKING_PREDICTIONS': '',
+    'CUTTING_VIDEOS': '',
+    'COMPLETE': ''
+};
 
 // Tips to display during processing
 const processingTips = [
-    "Our AI analyzes 33 body landmarks in real-time to assess your exercise form.",
-    "The system evaluates head position, hip alignment, elbow placement, and range of motion.",
-    "We use Random Forest classifiers achieving over 92% accuracy in form assessment.",
+    "Our system analyzes 33 body landmarks in real-time to assess your exercise form.",
+    "The system evaluates head position, hip alignment, and range of motion.",
     "MediaPipe pose estimation tracks your movement with sub-millimeter precision.",
     "Each repetition is analyzed individually for detailed performance insights.",
     "Biomechanical analysis calculates joint angles to ensure proper form.",
@@ -84,6 +109,123 @@ function rotateTip() {
     }, 300);
 }
 
+function updateStepIndicators(currentStage) {
+    const currentStep = stageToStep[currentStage];
+    if (!currentStep) return;
+    
+    // Get all step items
+    const stepItems = document.querySelectorAll('.step-item');
+    const stepConnectors = document.querySelectorAll('.step-connector');
+    
+    // Define step order
+    const stepOrder = ['upload', 'landmarks', 'signals', 'reps', 'features', 'prediction'];
+    const currentIndex = stepOrder.indexOf(currentStep);
+    
+    // Update step items
+    stepItems.forEach((item, index) => {
+        const stepName = item.getAttribute('data-step');
+        const stepIndex = stepOrder.indexOf(stepName);
+        
+        if (stepIndex < currentIndex) {
+            // Completed steps
+            item.classList.add('completed');
+            item.classList.remove('active');
+        } else if (stepIndex === currentIndex) {
+            // Current step
+            item.classList.add('active');
+            item.classList.remove('completed');
+        } else {
+            // Future steps
+            item.classList.remove('active', 'completed');
+        }
+    });
+    
+    // Update connectors
+    stepConnectors.forEach((connector, index) => {
+        if (index < currentIndex) {
+            connector.classList.add('completed');
+        } else {
+            connector.classList.remove('completed');
+        }
+    });
+}
+
+function updateProgressUI(progressData) {
+    if (!progressData) return;
+    
+    console.log('Updating UI with progress:', progressData);
+    
+    // Update stage message
+    if (stageText) {
+        stageText.textContent = progressData.message;
+    }
+    
+    // Update stage icon
+    const stageIcon = document.querySelector('.stage-icon');
+    if (stageIcon && stageIcons[progressData.stage]) {
+        stageIcon.textContent = stageIcons[progressData.stage];
+    }
+    
+    // Update rep counter (e.g., "Rep 3/10")
+    const repCounterContainer = document.getElementById('repCounterContainer');
+    const repCounter = document.getElementById('repCounter');
+    if (progressData.details && repCounter && repCounterContainer) {
+        repCounter.textContent = `Rep ${progressData.details}`;
+        repCounterContainer.style.display = 'flex';
+    } else if (repCounterContainer) {
+        repCounterContainer.style.display = 'none';
+    }
+    
+    // Update step indicators (MAIN VISUAL FEEDBACK)
+    updateStepIndicators(progressData.stage);
+}
+
+function startProgressPolling(sessionId) {
+    console.log('Starting progress polling for session:', sessionId);
+    currentSessionId = sessionId;
+    
+    // Clear any existing polling
+    if (progressPollingInterval) {
+        clearInterval(progressPollingInterval);
+    }
+    
+    // Poll every 500ms
+    progressPollingInterval = setInterval(async () => {
+        try {
+            const response = await fetch(`/api/progress/?session_id=${sessionId}`);
+            
+            if (!response.ok) {
+                if (response.status === 404) {
+                    console.log('Progress data not found yet, continuing to poll...');
+                    return;
+                }
+                console.error('Progress polling error:', response.status);
+                return;
+            }
+            
+            const progressData = await response.json();
+            console.log('Progress update:', progressData);
+            
+            updateProgressUI(progressData);
+            
+            // Stop polling when complete
+            if (progressData.progress >= 100 || progressData.stage === 'COMPLETE') {
+                console.log('Processing complete, stopping polling');
+                stopProgressPolling();
+            }
+        } catch (error) {
+            console.error('Error polling progress:', error);
+        }
+    }, 500);
+}
+
+function stopProgressPolling() {
+    if (progressPollingInterval) {
+        clearInterval(progressPollingInterval);
+        progressPollingInterval = null;
+    }
+}
+
 function showProcessingModal() {
     console.log('Showing processing modal');
     
@@ -104,8 +246,22 @@ function showProcessingModal() {
     }
     
     if (stageText) {
-        stageText.textContent = 'Processing your video...';
+        stageText.textContent = 'Uploading video...';
     }
+    
+    // Hide rep counter initially
+    const repCounterContainer = document.getElementById('repCounterContainer');
+    if (repCounterContainer) {
+        repCounterContainer.style.display = 'none';
+    }
+    
+    // Reset step indicators
+    document.querySelectorAll('.step-item').forEach(item => {
+        item.classList.remove('active', 'completed');
+    });
+    document.querySelectorAll('.step-connector').forEach(connector => {
+        connector.classList.remove('completed');
+    });
     
     // Start timer
     if (timerInterval) clearInterval(timerInterval);
@@ -118,6 +274,7 @@ function showProcessingModal() {
 function hideProcessingModal() {
     processingModal.classList.remove('active');
     if (timerInterval) clearInterval(timerInterval);
+    stopProgressPolling();
 }
 
 // Video Preview Functions
@@ -169,7 +326,7 @@ function removeVideo() {
     }
 
     startButton.disabled = true;
-    startButton.textContent = "Send and Process Video";
+    startButton.querySelector('span').textContent = "Send and Process Video";
     progressWrapper.classList.remove("active");
     progressBar.style.width = "0%";
     statusMessage.style.display = "none";
@@ -196,6 +353,7 @@ videoDropzone.on("addedfile", function (file) {
         showErrorModal(`File is too large.\n\nMaximum size: 150 MB\nYour file: ${fileSizeMB} MB`);
         return;
     }
+    
     cleanupPreviousVideo();
 
     dropzoneArea.classList.add("has-file");
@@ -309,27 +467,71 @@ videoDropzone.on("totaluploadprogress", (progress) => {
     progressBar.style.width = progress + "%";
 });
 
-videoDropzone.on("sending", function() {
+videoDropzone.on("sending", function(file, xhr, formData) {
     console.log('Sending file...');
     showProcessingModal();
+    
+    // Generate a session ID for this upload
+    currentSessionId = 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+    formData.append('session_id', currentSessionId);
+    
+    console.log('Generated session ID:', currentSessionId);
 });
 
 videoDropzone.on("success", (file, response) => {
     console.log('Upload success:', response);
     
     progressBar.style.background = "linear-gradient(90deg, #45d96f, #21a655)";
-    hideProcessingModal();
-
-    if (response.status === "success") {
-        console.log('Redirecting to:', response.redirect_url);
-        window.location.href = response.redirect_url;
-    } else {
-        statusMessage.textContent = "✗ Processing failed";
-        statusMessage.className = "status-message error";
-        startButton.disabled = false;
-        startButton.querySelector('span').textContent = "Try Again";
+    
+    // IMMEDIATE: Start polling as soon as upload completes
+    if (response.session_id) {
+        console.log('Starting progress tracking IMMEDIATELY for session:', response.session_id);
+        startProgressPolling(response.session_id);
+        
+        // Also start checking for completion
+        checkForCompletion(response.session_id);
+    } else if (currentSessionId) {
+        console.log('Using generated session ID:', currentSessionId);
+        startProgressPolling(currentSessionId);
+        checkForCompletion(currentSessionId);
     }
 });
+
+function checkForCompletion(sessionId) {
+    const checkInterval = setInterval(async () => {
+        try {
+            const response = await fetch(`/api/check-status/?session_id=${sessionId}`);
+            
+            if (!response.ok) {
+                console.error('Status check error:', response.status);
+                return;
+            }
+            
+            const data = await response.json();
+            console.log('Status check:', data);
+            
+            if (data.status === 'complete') {
+                clearInterval(checkInterval);
+                stopProgressPolling();
+                
+                // Wait a moment to show completed state, then redirect
+                setTimeout(() => {
+                    hideProcessingModal();
+                    console.log('Redirecting to:', data.redirect_url);
+                    window.location.href = data.redirect_url;
+                }, 1500);
+            } else if (data.status === 'error') {
+                clearInterval(checkInterval);
+                stopProgressPolling();
+                hideProcessingModal();
+                showErrorModal(data.error || 'Processing failed');
+            }
+            // If status is 'processing', keep checking
+        } catch (error) {
+            console.error('Error checking status:', error);
+        }
+    }, 2000); // Check every 2 seconds
+}
 
 videoDropzone.on("error", (file, errorMessage) => {
     console.error('Upload error:', errorMessage);
@@ -376,9 +578,12 @@ if (errorCloseBtn) {
     errorCloseBtn.onclick = hideErrorModal;
 }
 
-window.addEventListener("beforeunload", cleanupPreviousVideo);
+window.addEventListener("beforeunload", () => {
+    cleanupPreviousVideo();
+    stopProgressPolling();
+});
 
 // Debug logging
-console.log('Dropzone handler initialized');
+console.log('Dropzone handler initialized with progress tracking');
 console.log('Processing modal element:', processingModal ? 'Found' : 'NOT FOUND');
 console.log('Stage text element:', stageText ? 'Found' : 'NOT FOUND');

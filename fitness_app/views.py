@@ -4,14 +4,44 @@ import numpy as np
 from django.http import JsonResponse
 from django.shortcuts import render, redirect
 from django.conf import settings
+from django.views.decorators.http import require_GET
 from .models import PushupVideosModel
 from fitness_app.uploading_processor import UploadingProcessor
-
-
+from fitness_app.utils.progress_tracker import ProgressTracker
+import uuid
+import threading
 
 def home(request):
     """Home page view"""
     return render(request, "index.html")
+
+@require_GET
+def get_upload_progress(request):
+    """
+    API endpoint to poll for upload/processing progress
+    
+    Query params:
+        session_id: The session ID for the processing job
+        
+    Returns:
+        JSON with progress information
+    """
+    session_id = request.GET.get('session_id')
+    
+    if not session_id:
+        return JsonResponse({
+            'error': 'session_id parameter is required'
+        }, status=400)
+    
+    progress_data = ProgressTracker.get_by_session_id(session_id)
+    
+    if progress_data is None:
+        return JsonResponse({
+            'error': 'No progress data found for this session',
+            'session_id': session_id
+        }, status=404)
+    
+    return JsonResponse(progress_data)
 
 
 def convert_numpy_types(obj):
@@ -41,57 +71,130 @@ def convert_numpy_types(obj):
         return obj
 
 
+def process_video_async(video_path, session_id, request_session_key):
+    """Process video in background thread"""
+    try:
+        processor = UploadingProcessor(session_id=session_id)
+        results = processor._process_video(video_path)
+        
+        # Convert numpy types
+        results_clean = convert_numpy_types(results)
+        
+        # Store results using Django's session framework
+        # Note: You'll need to access session differently in thread
+        # Store in cache temporarily with session_id as key
+        from django.core.cache import cache
+        cache.set(f'results_{session_id}', {
+            "status": "complete",
+            "total_reps": results_clean.get('total_reps', 0),
+            "output_dir": results_clean.get('output_dir', ''),
+            "repetitions": results_clean.get('repetitions', []),
+            "overall_statistics": results_clean.get('overall_statistics', {})
+        }, 3600)  # Store for 1 hour
+        
+        print(f"✅ Processing complete for session: {session_id}")
+        
+    except Exception as e:
+        print(f"❌ Error processing video: {e}")
+        from django.core.cache import cache
+        cache.set(f'results_{session_id}', {
+            "status": "error",
+            "error": str(e)
+        }, 3600)
+
+
 def upload_video(request):
-    """Handle video upload and processing"""
+    """Handle video upload and start async processing"""
     if request.method == "POST":
         video_file = request.FILES.get('video')
         
+        # Get or generate session ID
+        session_id = request.POST.get('session_id')
+        if not session_id:
+            session_id = str(uuid.uuid4())
+        
         if not video_file:
             return JsonResponse({"error": "No video file provided"}, status=400)
-
+        
         try:
             # Save to database
             video_obj = PushupVideosModel.objects.create(video=video_file)
             video_path = video_obj.video.path
             
-            # Process video
-            processor = UploadingProcessor()
-            results = processor._process_video(video_path)
+            print(f"🎬 Starting async processing for session: {session_id}")
             
-            if results.get('repetitions'):
-                first_rep = results['repetitions'][0]
-                ml_checks = first_rep.get('ml_form_checks', {})
-                print(f"✓ ML predictions in results: {list(ml_checks.keys())}")
-                if ml_checks.get('range_of_motion'):
-                    print(f"  ROM prediction: {ml_checks['range_of_motion'].get('value')}")
-
-            # Convert numpy types to native Python types
-            results_clean = convert_numpy_types(results)
+            # Start processing in background thread
+            thread = threading.Thread(
+                target=process_video_async,
+                args=(video_path, session_id, request.session.session_key)
+            )
+            thread.daemon = True
+            thread.start()
             
-            # Store ALL results in session (including metrics!)
-            request.session['analysis_results'] = {
-                "video_id": video_obj.id,
-                "total_reps": results_clean.get('total_reps', 0),
-                "output_dir": results_clean.get('output_dir', ''),
-                "repetitions": results_clean.get('repetitions', []),
-                "overall_statistics": results_clean.get('overall_statistics', {})
-            }
-            
+            # Return immediately so frontend can start polling
             return JsonResponse({
-                "status": "success",
-                "redirect_url": "/demo/results/"
+                "status": "processing",  # Changed from "success"
+                "session_id": session_id,
+                "message": "Processing started"
             })
         
         except Exception as e:
             import traceback
             error_trace = traceback.format_exc()
-            print(f"Error processing video: {error_trace}")
+            print(f"Error starting processing: {error_trace}")
             return JsonResponse({
-                "error": f"Processing failed: {str(e)}"
+                "error": f"Processing failed: {str(e)}",
+                "session_id": session_id
             }, status=500)
     
     return render(request, "uploading_file/upload_video.html")
 
+
+def check_processing_status(request):
+    """
+    NEW ENDPOINT: Check if processing is complete and get results
+    Frontend should poll this after processing finishes
+    """
+    session_id = request.GET.get('session_id')
+    if not session_id:
+        return JsonResponse({'error': 'session_id required'}, status=400)
+    
+    from django.core.cache import cache
+    results = cache.get(f'results_{session_id}')
+    
+    if not results:
+        return JsonResponse({
+            'status': 'processing',
+            'message': 'Still processing...'
+        })
+    
+    if results.get('status') == 'complete':
+        # Store in session for results page
+        request.session['analysis_results'] = {
+            "video_id": results.get('video_id'),
+            "total_reps": results.get('total_reps', 0),
+            "output_dir": results.get('output_dir', ''),
+            "repetitions": results.get('repetitions', []),
+            "overall_statistics": results.get('overall_statistics', {}),
+            "session_id": session_id
+        }
+        
+        return JsonResponse({
+            'status': 'complete',
+            'redirect_url': '/demo/results/',
+            'total_reps': results.get('total_reps', 0)
+        })
+    
+    elif results.get('status') == 'error':
+        return JsonResponse({
+            'status': 'error',
+            'error': results.get('error', 'Unknown error')
+        }, status=500)
+    
+    return JsonResponse({
+        'status': 'processing',
+        'message': 'Still processing...'
+    })
 
 def results_view(request):
     """Display AI processing results"""

@@ -83,6 +83,14 @@ TEMPLATES = [
     },
 ]
 
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'posepro-cache',
+    }
+}
+
+
 WSGI_APPLICATION = 'fitness_app.wsgi.application'
 
 

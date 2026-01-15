@@ -70,7 +70,8 @@
         <button id="errorCloseBtn" class="modal-button">OK</button>
     </div>
 </div>
-<!-- Processing Modal with New Design -->
+
+<!-- Processing Modal - Simplified (No Progress Bar) -->
 <div class="processing-modal" id="processingModal">
     <div class="processing-modal-overlay"></div>
     <div class="processing-modal-content">
@@ -98,7 +99,7 @@
         <!-- Progress Info -->
         <div class="progress-info">
             <div class="progress-stage" id="currentStage">
-                <span class="stage-icon">🔄</span>
+    
                 <span class="stage-text" id="stageText">Preparing video...</span>
             </div>
             
@@ -110,21 +111,21 @@
                     </svg>
                     <span id="timeElapsed">0s</span>
                 </div>
-                <div class="detail-item">
+                <div class="detail-item" id="repCounterContainer" style="display: none;">
                     <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
                         <path d="M8 2V8H14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
                         <circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="2"/>
                     </svg>
-                    <span id="currentStep">Step 1/5</span>
+                    <span id="repCounter">Rep 1/10</span>
                 </div>
             </div>
         </div>
 
-        <!-- Steps Indicator -->
+        <!-- Steps Indicator (Main Feature) -->
         <div class="steps-indicator">
-            <div class="step-item" data-step="segmentation">
+            <div class="step-item" data-step="upload">
                 <div class="step-dot"></div>
-                <span class="step-label">Segment</span>
+                <span class="step-label">Upload</span>
             </div>
             <div class="step-connector"></div>
             <div class="step-item" data-step="landmarks">
@@ -132,14 +133,19 @@
                 <span class="step-label">Landmarks</span>
             </div>
             <div class="step-connector"></div>
-            <div class="step-item" data-step="angles">
+            <div class="step-item" data-step="signals">
                 <div class="step-dot"></div>
-                <span class="step-label">Angles</span>
+                <span class="step-label">Signals</span>
             </div>
             <div class="step-connector"></div>
-            <div class="step-item" data-step="aggregation">
+            <div class="step-item" data-step="reps">
                 <div class="step-dot"></div>
-                <span class="step-label">Aggregate</span>
+                <span class="step-label">Reps</span>
+            </div>
+            <div class="step-connector"></div>
+            <div class="step-item" data-step="features">
+                <div class="step-dot"></div>
+                <span class="step-label">Features</span>
             </div>
             <div class="step-connector"></div>
             <div class="step-item" data-step="prediction">
@@ -151,7 +157,7 @@
         <!-- Tips Section -->
         <div class="processing-tips">
             <h4>Did you know?</h4>
-            <p id="processingTip">Our AI analyzes 33 body landmarks in real-time to assess your exercise form.</p>
+            <p id="processingTip">Our system analyzes 33 body landmarks in real-time to assess your exercise form.</p>
         </div>
     </div>
 </div>

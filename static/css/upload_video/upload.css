@@ -621,6 +621,8 @@
     50% { opacity: 0.4; transform: translate(-50%, -50%) scale(1.1); }
 }
 
+
+
 /* Progress Info */
 .progress-info {
     text-align: center;
@@ -639,12 +641,7 @@
 
 .stage-icon {
     font-size: 1.25rem;
-    animation: rotate 2s linear infinite;
-}
-
-@keyframes rotate {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
+    display: inline-block;
 }
 
 .stage-text {
@@ -705,9 +702,10 @@
 }
 
 .step-item.active .step-dot {
-    background: var(--gradient-primary);
+    background: linear-gradient(135deg, #4facfe, #00f2fe);
     border-color: var(--accent);
-    box-shadow: var(--shadow-glow);
+    box-shadow: 0 0 15px rgba(79, 172, 254, 0.6);
+    transform: scale(1.1);
 }
 
 .step-item.active .step-dot::after {
@@ -736,6 +734,7 @@
 .step-item.completed .step-dot {
     background: linear-gradient(135deg, #45d96f 0%, #21a655 100%);
     border-color: #45d96f;
+    box-shadow: 0 0 15px rgba(69, 217, 111, 0.6);
 }
 
 .step-item.completed .step-dot::before {
@@ -772,10 +771,11 @@
     margin: 0 0.25rem;
     position: relative;
     top: -12px;
+    transition: background var(--transition-slow);
 }
 
-.step-item.completed + .step-connector {
-    background: linear-gradient(90deg, #45d96f, rgba(0, 217, 255, 0.2));
+.step-connector.completed {
+    background: linear-gradient(90deg, #45d96f, #21a655);
 }
 
 /* Processing Tips */
@@ -801,9 +801,65 @@
     color: var(--text-secondary);
     font-size: 0.813rem;
     line-height: 1.5;
+    transition: opacity 0.3s ease;
 }
 
-/* Responsive Design */
+/* Error Modal Styles */
+.processing-modal-content.error-modal {
+    text-align: center;
+    max-width: 500px;
+}
+
+.error-icon {
+    font-size: 64px;
+    margin-bottom: 1.5rem;
+}
+
+.error-modal h2 {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--text-primary);
+    margin-bottom: 1rem;
+}
+
+.error-modal p {
+    color: var(--text-secondary);
+    font-size: 1rem;
+    line-height: 1.6;
+    margin-bottom: 2rem;
+    white-space: pre-line;
+}
+
+.modal-button {
+    background: var(--gradient-primary);
+    color: var(--text-primary);
+    border: none;
+    padding: 0.875rem 2rem;
+    border-radius: var(--radius-full);
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 700;
+    font-family: 'Syne', sans-serif;
+    transition: all var(--transition-base);
+    box-shadow: 0 4px 20px rgba(0, 217, 255, 0.3);
+    width: 100%;
+    max-width: 200px;
+}
+
+.modal-button:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-glow);
+}
+
+.modal-button:active {
+    transform: translateY(0);
+}
+
+/* ===========================
+   Responsive Design
+   =========================== */
+
 @media (max-width: 768px) {
     .upload-section {
         padding: calc(64px + 1.5rem) 0 1.5rem;
@@ -857,6 +913,24 @@
         margin: 1rem auto;
     }
     
+    /* Progress bar responsive */
+    .main-progress-bar {
+        height: 10px;
+    }
+    
+    .progress-percentage {
+        font-size: 16px;
+    }
+    
+    .progress-rep-details {
+        font-size: 12px;
+    }
+    
+    .main-progress-container {
+        padding: 0 5px;
+        margin: 20px 0 15px;
+    }
+    
     .steps-indicator {
         padding: 0 0.5rem;
     }
@@ -880,6 +954,24 @@
     
     .processing-tips p {
         font-size: 0.75rem;
+    }
+    
+    .error-icon {
+        font-size: 56px;
+        margin-bottom: 1.25rem;
+    }
+
+    .error-modal h2 {
+        font-size: 1.25rem;
+    }
+
+    .error-modal p {
+        font-size: 0.938rem;
+    }
+
+    .modal-button {
+        font-size: 0.938rem;
+        padding: 0.75rem 1.5rem;
     }
 }
 
@@ -953,6 +1045,19 @@
         height: 70px;
     }
     
+    /* Progress bar responsive */
+    .main-progress-bar {
+        height: 8px;
+    }
+    
+    .progress-percentage {
+        font-size: 14px;
+    }
+    
+    .stage-icon {
+        font-size: 18px;
+    }
+    
     .progress-details {
         gap: 1rem;
     }
@@ -965,85 +1070,7 @@
     .step-label {
         font-size: 0.563rem;
     }
-}
-
-.processing-modal-content.error-modal {
-    text-align: center;
-    max-width: 500px;
-}
-
-/* Error Icon */
-.error-icon {
-    font-size: 64px;
-    margin-bottom: 1.5rem;
-}
-
-/* Error Title */
-.error-modal h2 {
-    font-family: 'Syne', sans-serif;
-    font-size: 1.5rem;
-    font-weight: 800;
-    color: var(--text-primary);
-    margin-bottom: 1rem;
-}
-
-/* Error Message */
-.error-modal p {
-    color: var(--text-secondary);
-    font-size: 1rem;
-    line-height: 1.6;
-    margin-bottom: 2rem;
-    white-space: pre-line;
-}
-
-/* Error Button */
-.modal-button {
-    background: var(--gradient-primary); /* Twój główny gradient */
-    color: var(--text-primary);
-    border: none;
-    padding: 0.875rem 2rem;
-    border-radius: var(--radius-full);
-    cursor: pointer;
-    font-size: 1rem;
-    font-weight: 700;
-    font-family: 'Syne', sans-serif;
-    transition: all var(--transition-base);
-    box-shadow: 0 4px 20px rgba(0, 217, 255, 0.3);
-    width: 100%;
-    max-width: 200px;
-}
-
-.modal-button:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-glow);
-}
-
-.modal-button:active {
-    transform: translateY(0);
-}
-
-/* Responsive */
-@media (max-width: 768px) {
-    .error-icon {
-        font-size: 56px;
-        margin-bottom: 1.25rem;
-    }
-
-    .error-modal h2 {
-        font-size: 1.25rem;
-    }
-
-    .error-modal p {
-        font-size: 0.938rem;
-    }
-
-    .modal-button {
-        font-size: 0.938rem;
-        padding: 0.75rem 1.5rem;
-    }
-}
-
-@media (max-width: 480px) {
+    
     .error-icon {
         font-size: 48px;
         margin-bottom: 1rem;

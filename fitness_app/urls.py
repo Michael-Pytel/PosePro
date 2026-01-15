@@ -39,7 +39,8 @@ urlpatterns = [
     # path('video/<int:video_id>/', video_detail_view, name='video_detail'),
     
     # API
-    # path('api/progress/', views.get_progress, name='get_progress'),
+    path('api/progress/', views.get_upload_progress, name='upload_progress'),
+    path('api/check-status/', views.check_processing_status, name='check_status'),
 ]
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

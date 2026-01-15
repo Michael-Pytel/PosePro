@@ -10,6 +10,9 @@ const processingModal = document.getElementById("processingModal");
 const stageText = document.getElementById("stageText");
 const timeElapsed = document.getElementById("timeElapsed");
 const processingTip = document.getElementById("processingTip");
+const errorModal = document.getElementById("errorModal");
+const errorMessage = document.getElementById("errorMessage");
+const errorCloseBtn = document.getElementById("errorCloseBtn");
 
 // State
 let activeTimeouts = [];
@@ -33,15 +36,16 @@ const processingTips = [
 let videoDropzone = new Dropzone("#dropzoneArea", {
     url: '/demo/upload/',
     maxFiles: 1,
+    maxFilesize: 150,
     paramName: "video",
-    acceptedFiles: "video/*",
+    acceptedFiles: ".MP4,.MOV,.AVI,.mp4,.mov,.avi",
     addRemoveLinks: false,
     autoProcessQueue: false,
     createImageThumbnails: false,
     dictDefaultMessage: "Click or drag video here to upload",
     dictFallbackMessage: "Your browser does not support drag and drop file uploads.",
     dictFileTooBig: "File is too big ({{filesize}}MB). Max filesize: {{maxFilesize}}MB.",
-    dictInvalidFileType: "You can't upload files of this type.",
+    dictInvalidFileType: "Invalid file format. Only MP4, MOV, and AVI files are accepted.",
     dictRemoveFile: "Remove",
     dictCancelUpload: "Cancel upload"
 });
@@ -175,6 +179,23 @@ function removeVideo() {
 // Dropzone Event Handlers
 videoDropzone.on("addedfile", function (file) {
     console.log('File added:', file.name);
+
+    const allowedFormats = ['mp4', 'mov', 'avi'];
+    const fileExtension = file.name.split('.').pop().toLowerCase();
+
+    if (!allowedFormats.includes(fileExtension)) {
+        videoDropzone.removeFile(file);
+        showErrorModal(`Invalid file format.\n\nOnly MP4, MOV, and AVI files are accepted.\nYour file: ${file.name}`);
+        return;
+    }
+
+    const maxSize = 150 * 1024 * 1024; // 150 MB
+    if (file.size > maxSize) {
+        videoDropzone.removeFile(file);
+        const fileSizeMB = (file.size / (1024 * 1024)).toFixed(2);
+        showErrorModal(`File is too large.\n\nMaximum size: 150 MB\nYour file: ${fileSizeMB} MB`);
+        return;
+    }
     cleanupPreviousVideo();
 
     dropzoneArea.classList.add("has-file");
@@ -314,8 +335,17 @@ videoDropzone.on("error", (file, errorMessage) => {
     console.error('Upload error:', errorMessage);
     hideProcessingModal();
     
-    statusMessage.textContent = "✗ Upload error: " + errorMessage;
-    statusMessage.className = "status-message error";
+    videoDropzone.removeFile(file);
+
+    let message = "Upload failed. Please try again.";
+    if (typeof errorMessage === 'string') {
+        message = errorMessage;
+    } else if (errorMessage.error) {
+        message = errorMessage.error;
+    }
+
+    showErrorModal(message);
+
     startButton.disabled = false;
     startButton.querySelector('span').textContent = "Try Again";
 });
@@ -332,6 +362,19 @@ videoDropzone.on("queuecomplete", () => {
 videoDropzone.on("maxfilesexceeded", function(file) {
     videoDropzone.removeFile(file);
 });
+
+function showErrorModal(message) {
+    errorMessage.textContent = message;
+    errorModal.classList.add('active');
+}
+
+function hideErrorModal() {
+    errorModal.classList.remove('active');
+}
+
+if (errorCloseBtn) {
+    errorCloseBtn.onclick = hideErrorModal;
+}
 
 window.addEventListener("beforeunload", cleanupPreviousVideo);
 

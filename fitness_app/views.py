@@ -48,16 +48,15 @@ def convert_numpy_types(obj):
     """
     Recursively convert numpy types to native Python types for JSON serialization
     """
-    if obj is None:  # NEW - handle None explicitly
+    if obj is None: 
         return None
     elif isinstance(obj, (np.integer, np.int64, np.int32, np.int16, np.int8)):
         return int(obj)
     elif isinstance(obj, (np.floating, np.float64, np.float32, np.float16)):
-        # Handle NaN
         if np.isnan(obj):
             return None
         return float(obj)
-    elif isinstance(obj, (np.bool_, np.bool8, bool)):  # Include native bool
+    elif isinstance(obj, (np.bool_, np.bool8, bool)):
         return bool(obj)
     elif isinstance(obj, np.ndarray):
         return obj.tolist()

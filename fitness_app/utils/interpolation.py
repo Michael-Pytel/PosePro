@@ -28,11 +28,3 @@ def interpolate_nans(signal):
         t = (missing_i - left_known) / (right_known - left_known)
         y[missing_i] = cubic_interp(y[left_support], y[left_known], y[right_known], y[right_support], t)
     return y
-
-# def interpolate_nans(signal):
-#     nans = np.isnan(signal)
-#     if nans.all():
-#         return signal
-#     x = np.arange(len(signal))
-#     signal[nans] = np.interp(x[nans], x[~nans], signal[~nans])
-#     return signal

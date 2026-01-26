@@ -49,7 +49,7 @@ const stageIcons = {
 
 // Tips to display during processing
 const processingTips = [
-    "Our system analyzes 33 body landmarks in real-time to assess your exercise form.",
+    "Our system analyzes 33 body landmarks to assess your exercise form.",
     "The system evaluates head position, hip alignment, and range of motion.",
     "MediaPipe pose estimation tracks your movement with sub-millimeter precision.",
     "Each repetition is analyzed individually for detailed performance insights.",

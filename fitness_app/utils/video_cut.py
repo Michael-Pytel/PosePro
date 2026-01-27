@@ -161,20 +161,3 @@ def cut_video_segments(video_path, repetitions, output_dir):
     cmd, outputs = multi_rep_processing((video_path, repetitions, output_dir, fps, crf, preset, has_audio))
     run(cmd)
     return True
-
-# def function_for_testing(video_path, csv, output_path):
-#     filename = Path(video_path).name
-#     parentname = Path(video_path).parent.name
-#     val_as_str = csv[(csv["athlete_id"] == parentname) & (csv["video_name"] == filename)].iloc[0]["result"]
-#     reps = ast.literal_eval(val_as_str)
-#     cut_video_segments(video_path, reps, output_path)
-#     return True
-
-# if __name__ == "__main__":
-#     video_path = r"C:\Users\jakub\Documents\Inzynierka\camera-based-exercise-evaluation\data\recordings\own_recordings\pushups\wszystkie_nagrania\athlete0026\athlete0026_2.MP4"
-#     csv = pd.read_csv("pipeline_full_evaluation_report.csv")
-#     filename = Path(video_path).name
-#     parentname= Path(video_path).parent.name
-#     val_as_str = csv[(csv["athlete_id"] == parentname) & (csv["video_name"] == filename)].iloc[0]["result"]
-#     reps = ast.literal_eval(val_as_str)
-#     cut_video_segments(video_path,reps,"c")

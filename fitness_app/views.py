@@ -10,6 +10,7 @@ from fitness_app.uploading_processor import UploadingProcessor
 from fitness_app.utils.progress_tracker import ProgressTracker
 import uuid
 import threading
+from django.core.cache import cache
 
 def home(request):
     """Home page view"""
@@ -79,10 +80,7 @@ def process_video_async(video_path, session_id, request_session_key):
         # Convert numpy types
         results_clean = convert_numpy_types(results)
         
-        # Store results using Django's session framework
-        # Note: You'll need to access session differently in thread
-        # Store in cache temporarily with session_id as key
-        from django.core.cache import cache
+        # Store results using Django's session framework  
         cache.set(f'results_{session_id}', {
             "status": "complete",
             "total_reps": results_clean.get('total_reps', 0),
@@ -130,9 +128,8 @@ def upload_video(request):
             thread.daemon = True
             thread.start()
             
-            # Return immediately so frontend can start polling
             return JsonResponse({
-                "status": "processing",  # Changed from "success"
+                "status": "processing", 
                 "session_id": session_id,
                 "message": "Processing started"
             })
@@ -150,10 +147,7 @@ def upload_video(request):
 
 
 def check_processing_status(request):
-    """
-    NEW ENDPOINT: Check if processing is complete and get results
-    Frontend should poll this after processing finishes
-    """
+
     session_id = request.GET.get('session_id')
     if not session_id:
         return JsonResponse({'error': 'session_id required'}, status=400)
@@ -270,11 +264,8 @@ def results_view(request):
                     metrics = next((r for r in repetitions if r.get('rep_id') == rep_id), None)
                     
                     if metrics:
-                        # Add timing data to metrics if available
-                        # Assuming your processor adds timing to features['timing']
                         timing_data = metrics.get('features', {}).get('timing', {})
                         
-                        # Merge timing into the main metrics dict for easy template access
                         metrics_with_timing = {**metrics}
                         if timing_data:
                             metrics_with_timing['up_time'] = timing_data.get('up_time')
@@ -285,7 +276,7 @@ def results_view(request):
                             'rep_number': rep_id,
                             'filename': filename,
                             'video_url': f'{settings.MEDIA_URL}{output_dir}/{filename}',
-                            'metrics': metrics_with_timing  # Use the enhanced metrics
+                            'metrics': metrics_with_timing 
                         })
             except (IndexError, ValueError):
                 continue

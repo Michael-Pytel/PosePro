@@ -18,7 +18,7 @@ class DemoCleanupMiddleware(MiddlewareMixin):
         if request.path == '/demo/upload/' and request.method == 'POST':
             self.cleanup_demo_files()
         
-        return None  # Continue processing the request
+        return None  
     
     def cleanup_demo_files(self):
         """Clean up temporary demo files"""
@@ -27,14 +27,11 @@ class DemoCleanupMiddleware(MiddlewareMixin):
         try:
             videos = PushupVideosModel.objects.all()
             for video in videos:
-                # Delete file from disk
                 if video.video and os.path.exists(video.video.path):
                     os.remove(video.video.path)
-                    # Also delete parent directory if empty
                     video_dir = os.path.dirname(video.video.path)
                     if os.path.exists(video_dir) and not os.listdir(video_dir):
                         os.rmdir(video_dir)
-            # Delete from database
             videos.delete()
         except Exception as e:
             print(f"Error cleaning up videos: {e}")

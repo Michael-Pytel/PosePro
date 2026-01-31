@@ -51,7 +51,6 @@ const stageIcons = {
 const processingTips = [
     "Our system analyzes 33 body landmarks to assess your exercise form.",
     "The system evaluates head position, hip alignment, and range of motion.",
-    "MediaPipe pose estimation tracks your movement with sub-millimeter precision.",
     "Each repetition is analyzed individually for detailed performance insights.",
     "Biomechanical analysis calculates joint angles to ensure proper form.",
     "The model was trained on thousands of exercise videos for accurate predictions."

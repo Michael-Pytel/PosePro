@@ -150,14 +150,16 @@ def multi_rep_processing(args):
 
 
 def cut_video_segments(video_path, repetitions, output_dir):
-    os.makedirs(output_dir, exist_ok=True)
-    crf = 20
-    preset = "medium"
+    if len(repetitions) != 0:
+        os.makedirs(output_dir, exist_ok=True)
+        crf = 20
+        preset = "medium"
 
-    video_metadata = get_video_metadata(video_path)
-    fps = parse_fps(video_metadata)
-    has_audio = audio_check(video_metadata)
+        video_metadata = get_video_metadata(video_path)
+        fps = parse_fps(video_metadata)
+        has_audio = audio_check(video_metadata)
 
-    cmd, outputs = multi_rep_processing((video_path, repetitions, output_dir, fps, crf, preset, has_audio))
-    run(cmd)
+        cmd, outputs = multi_rep_processing((video_path, repetitions, output_dir, fps, crf, preset, has_audio))
+        run(cmd)
+
     return True

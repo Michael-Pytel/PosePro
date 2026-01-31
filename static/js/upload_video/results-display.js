@@ -111,7 +111,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 return;
             }
             
-            // Get video URL without the #t=0.5 timestamp
             const videoSrc = video.getAttribute('src').split('#')[0];
             console.log('Opening video modal for:', videoSrc);
             
@@ -138,7 +137,7 @@ document.addEventListener('DOMContentLoaded', function() {
             // Show modal
             if (videoModal) {
                 videoModal.classList.add('active');
-                document.body.style.overflow = 'hidden'; // Prevent background scrolling
+                document.body.style.overflow = 'hidden'; 
                 
                 // Auto-play after load (optional)
                 modalVideo.play().catch(err => {
@@ -156,9 +155,9 @@ document.addEventListener('DOMContentLoaded', function() {
         videoModal.classList.remove('active');
         if (modalVideo) {
             modalVideo.pause();
-            modalVideo.currentTime = 0; // Reset video to start
+            modalVideo.currentTime = 0; 
         }
-        document.body.style.overflow = ''; // Restore scrolling
+        document.body.style.overflow = ''; 
     }
     
     // Close button
@@ -179,9 +178,8 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     
     // ===========================
-    // SMOOTH SCROLL TO REP (Optional feature)
+    // SMOOTH SCROLL TO REP
     // ===========================
-    // If you add jump navigation later, this will handle smooth scrolling
     function scrollToRep(repNumber) {
         const repItem = document.querySelector(`[data-rep="${repNumber}"]`);
         if (repItem) {
@@ -189,8 +187,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 behavior: 'smooth', 
                 block: 'center' 
             });
-            
-            // Add highlight effect
+
             repItem.style.transition = 'all 0.3s ease';
             repItem.style.transform = 'scale(1.02)';
             setTimeout(() => {
@@ -200,7 +197,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     // ===========================
-    // KEYBOARD SHORTCUTS (Optional)
+    // KEYBOARD SHORTCUTS 
     // ===========================
     document.addEventListener('keydown', function(e) {
         // Don't trigger if typing in input field
@@ -250,7 +247,7 @@ function formatAngle(angle) {
 
 /**
  * Utility function to add loading state to element
- * @param {HTMLElement} element - Element to add loading state to
+ * @param {HTMLElement} element 
  */
 function addLoadingState(element) {
     element.classList.add('loading');
@@ -268,7 +265,6 @@ function removeLoadingState(element) {
     element.style.pointerEvents = 'auto';
 }
 
-// Export functions if using modules (optional)
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = {
         formatTime,

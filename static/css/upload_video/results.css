@@ -1,5 +1,5 @@
 /* ===========================
-   CSS Variables - Define if not already in base.css
+   CSS Variables 
    =========================== */
 :root {
     /* Colors */
@@ -47,14 +47,14 @@
     --shadow-xl: 0 20px 50px rgba(0, 0, 0, 0.4);
 }
 
-/* Dark background for entire page if needed */
+
 body {
     background: #0f0f1e;
     color: var(--text-primary);
 }
 
 /* ===========================
-   Results Page Styles - List View
+   Results Page Styles 
    =========================== */
 
 /* Container */
@@ -590,7 +590,7 @@ body {
 }
 
 /* ===========================
-   DETAILED METRICS - IMPROVED LAYOUT
+   DETAILED METRICS 
    =========================== */
 .rep-details {
     padding: var(--spacing-xl);

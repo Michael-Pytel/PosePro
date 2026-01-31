@@ -35,19 +35,16 @@ class UploadingProcessor:
         # 4. Feature Extraction & Prediction Loop
         total_reps = len(repetitions)
         for idx, rep in enumerate(repetitions, 1):
-            # Update progress with current rep
+            
             if idx <= total_reps // 2:
-                # First half: feature extraction
                 self.progress_tracker.update_with_substep(
                     ProcessingStage.EXTRACTING_FEATURES, idx, total_reps
                 )
             else:
-                # Second half: predictions
                 self.progress_tracker.update_with_substep(
                     ProcessingStage.MAKING_PREDICTIONS, idx, total_reps
                 )
-            
-            # A. Get EVERYTHING from the extractor in one line
+            # A. Extract Features
             ui_features, model_inputs = self.feature_extractor.extract_features(
                 signals, visibility_scores, rep, fps
             )
@@ -69,21 +66,3 @@ class UploadingProcessor:
             "repetitions": repetitions,
             "session_id": self.progress_tracker.session_id
         }
-
-if __name__ == "__main__":
-    # --- 1. Setup Django Environment ---
-    import os
-    import django
-    from django.conf import settings
-
-    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'fitness_app.settings')
-    django.setup()
-
-
-    # --- 3. Run the Processor ---
-    video_path = "C:\\Users\\micha\\Downloads\\recordings\\recordings\\own_recordings\\pushups\\pushup_02.mp4"
-    uploading_processor = UploadingProcessor()
-    
-    # Use pprint for readable output
-    import pprint
-    pprint.pprint(uploading_processor._process_video(video_path))

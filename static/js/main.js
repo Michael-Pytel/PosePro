@@ -214,9 +214,3 @@ function initMobileMenu() {
     // Placeholder for mobile menu functionality
     // Can be implemented when adding hamburger menu for mobile
 }
-
-// Initialize optional enhancements
-// Uncomment if you want these features:
-// initParallax();
-// initCTAButtons();
-// initStatsCounter();

@@ -34,13 +34,7 @@ class ProgressTracker:
         self.cache_timeout = 3600  # 1 hour
         
     def update(self, stage: ProcessingStage, details: Optional[str] = None):
-        """
-        Update progress for current processing stage
-        
-        Args:
-            stage: Current processing stage
-            details: Optional additional details (e.g., "Rep 3/10")
-        """
+
         progress_data = {
             'stage': stage.name,
             'message': stage.message,
@@ -51,14 +45,7 @@ class ProgressTracker:
         cache.set(self.cache_key, progress_data, self.cache_timeout)
         
     def update_with_substep(self, stage: ProcessingStage, current: int, total: int):
-        """
-        Update progress with substep information
-        
-        Args:
-            stage: Current processing stage
-            current: Current item number
-            total: Total number of items
-        """
+
         details = f"{current}/{total}"
         
         # Calculate interpolated progress within stage range
@@ -85,12 +72,7 @@ class ProgressTracker:
         cache.set(self.cache_key, progress_data, self.cache_timeout)
     
     def get_progress(self) -> dict:
-        """
-        Get current progress data
-        
-        Returns:
-            Dictionary with progress information or None if not found
-        """
+
         return cache.get(self.cache_key)
     
     def clear(self):
@@ -99,14 +81,6 @@ class ProgressTracker:
     
     @staticmethod
     def get_by_session_id(session_id: str) -> dict:
-        """
-        Get progress data by session ID
-        
-        Args:
-            session_id: Session identifier
-            
-        Returns:
-            Dictionary with progress information or None if not found
-        """
+
         cache_key = f"progress_{session_id}"
         return cache.get(cache_key)

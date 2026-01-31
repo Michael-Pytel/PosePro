@@ -75,6 +75,7 @@ def detect_pushup_repetitions(signals, landmark_data, visibility_scores, fps):
         repetitions.append({
             'rep_id': rep_id,
             'start_frame': int(start),
+            'bottom_frame': int(mid),
             'end_frame': int(end),
             'start_time': start / fps,
             'end_time': end / fps,

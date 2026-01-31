@@ -35,7 +35,6 @@ class Predictor:
     def _predict_single(self, df_features, model_key):
         """Helper to safely predict a single criterion."""
         
-        # Safety check: Do we have features and is the model loaded?
         if df_features is None or model_key not in FitnessAppConfig.models:
             return None
 
@@ -51,7 +50,6 @@ class Predictor:
                 probs = model.predict_proba(df_features)[0]
                 confidence = float(probs.max())
             except AttributeError:
-                # Fallback for models without predict_proba (e.g. some SVM configs)
                 confidence = 1.0 
 
             return {

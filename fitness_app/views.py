@@ -93,7 +93,6 @@ def process_video_async(video_path, session_id, request_session_key):
         
     except Exception as e:
         print(f"❌ Error processing video: {e}")
-        from django.core.cache import cache
         cache.set(f'results_{session_id}', {
             "status": "error",
             "error": str(e)
@@ -151,8 +150,7 @@ def check_processing_status(request):
     session_id = request.GET.get('session_id')
     if not session_id:
         return JsonResponse({'error': 'session_id required'}, status=400)
-    
-    from django.core.cache import cache
+
     results = cache.get(f'results_{session_id}')
     
     if not results:

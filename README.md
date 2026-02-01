@@ -1,10 +1,8 @@
 # PosePro
-The html templates are still temporary, text for now is just for aesthetic reasons.
+
 
 # HOW TO SETUP (python=3.12)
 ``` bash
-git clone https://github.com/Michael-Pytel/PosePro.git
-cd PosePro
 python -m venv venv
 .\venv\Scripts\activate
 pip install -r requirements.txt
@@ -13,13 +11,11 @@ python manage.py migrate
 python manage.py runserver
 ```
 
-The web app should be availabe now at: http://127.0.0.1:8000
-
 After configuring once all needed from now on is
 ``` bash
 python manage.py runserver
 ```
-
+The web app should be availabe now at: http://127.0.0.1:8000
 # Most important modules
 fitness_app/
  - core/ - all of the core functionalities

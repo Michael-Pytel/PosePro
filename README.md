@@ -225,7 +225,7 @@ The hip alignment classifier achieves the strongest results, with a recall of 0.
 
 ## Requirements
 
-- Python 3.9 or higher
+- Python 3.12 or higher
 - FFmpeg (must be available on PATH)
 - See `requirements.txt` for Python dependencies
 
